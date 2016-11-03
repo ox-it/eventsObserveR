@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style>
+.event circle {
+  stroke-width: 1.5px;
+}
+</style>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="animate_movement.js"></script>
+<body>
+<svg></svg>
+<p id=current_time></p>
+</body>
+
+<script>
+
+
+// The following will be handled in R when this is an HTMLWidget
+
+(function () {
+
+var events = [];
+
+var ignore_species = ["Humans with or without domestic animals", "Humans", "Domestic animals", ""];
+
+var species           = [];
+var stations          = [];
+var station_positions = [];
+var parseTime  = d3.timeParse("%d-%b-%y %H:%M:%S");
+var formatTime = d3.timeFormat("%H:%M:%S %d %b %y");
+var color = d3.scaleSequential(d3.interpolateRainbow);
+
+d3.csv("../../WildCRUData/WildCRU.csv",
+       function (row) {
+       	   // this should be performed by R when an HTMLWidget
+       	   var species_id = species.indexOf(row["Species"]);
+       	   var station = row["Camera ID"].substring(0, row["Camera ID"].indexOf("_Camera"));
+       	   var station_id = stations.indexOf(station);
+       	   var time = parseTime(row["Date"] + " " + row["Time"]);
+       	   var describe = function (attribute) {
+       	   	   if (row[attribute]) {
+       	   	   	  return " " + attribute + ": " + row[attribute];
+       	   	   }
+       	   	   return "";
+       	   };
+       	   if (ignore_species.indexOf(row["Species"]) >= 0) {
+       	   	   return;
+       	   }
+       	   if (species_id < 0) {
+		       species_id = species.push(row["Species"])-1;
+		   }
+		   if (station_id < 0) {
+		       station_id = stations.push(station)-1;
+		   }
+	       return {place_id:      station_id,
+				   event_type_id: species_id,
+				   time:          time,
+				   radius:        5*Math.sqrt(row["Number of Individuals"]),
+				   title:         row["Number of Individuals"] + " " + row["Species"] + " by " + row["Camera ID"] + " at " + formatTime(time) +
+									  describe("Number of males") +
+									  describe("Number of females") +
+									  describe("Number of unknown") +
+									  describe("Number of SA") +
+									  describe("Number of juv")};
+       },
+	   function(error, data) {
+	   	   var animal_observations = [];
+	   	   var max_event_type_id = 0;
+	   	   var width  = 600;
+	       var height = 600;
+	   	   if (error) throw error;
+	       data.forEach(function(event) {
+	       				    if (event) {
+	       				    	// following only used for color
+							    if (event.event_type_id > max_event_type_id) {
+								    max_event_type_id = event.event_type_id;
+							    }
+								animal_observations.push(event);
+	       				    }
+	       });
+	       var station_positions = stations.map(function (station, index) {
+	       	   var theta = 2 * Math.PI / stations.length;
+	       	   var rotation = -Math.PI / 2; // so the first camera is at 12 o'clock
+	       	   var margin = 50;
+               return {x: (width /2-margin) * Math.cos(index * theta + rotation)+width/2, 
+                       y: (height/2-margin) * Math.sin(index * theta + rotation)+height/2,
+                       radius: Math.min(width, height)/50,
+		               color:  'rgba(0, 0, 0, .05)',
+		               id: index};
+	       });
+	       animal_observations.forEach(function (d) {
+	       	   d.x = station_positions[d.place_id].x+Math.random()*8;
+	       	   d.y = station_positions[d.place_id].y+Math.random()*8;
+	       	   d.color = color(d.event_type_id/max_event_type_id);
+	       });
+
+	       animate_events(animal_observations, station_positions, {width: width, height: height, previous_period_duration: 24*60*60});
+	   });
+
+}());
+
+</script>
