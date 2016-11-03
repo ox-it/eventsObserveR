@@ -1,3 +1,5 @@
+// Developed by Ken Kahn and Martin Hadley of IT Services, University of Oxford
+
 <!-- very loosely based upon https://bl.ocks.org/mbostock/4062045 -->
 
 function animate_events(events, places, options) {
@@ -35,43 +37,41 @@ function animate_events(events, places, options) {
 	earliest_day.setMinutes(0);
 	earliest_day.setSeconds(0);
 
-// not sure sorting helps
-// 	       records.sort(function (a, b) {
-// 	       	             if (a.time < b.time) {
-// 	       	             	return -1;
-// 	       	             }
-// 	       	             if (a.time > b.time) {
-// 	       	             	return 1;
-// 	       	             }
-// 	       	             return 0;
-// 	       });
-
-// this didn't work because it ran collision detection for all animal observations so they become very spread out
-//     var simulation = d3.forceSimulation(records)
-//     // based on http://bl.ocks.org/mbostock/31ce330646fa8bcb7289ff3b97aab3f5
-//     .velocityDecay(0.2)
-//     .force("x", d3.forceX().strength(0.002))
-//     .force("y", d3.forceY().strength(0.002))
-//     .force("collide", d3.forceCollide().radius(function(d) { 
-//     											    return d.r + 0.5; 
-//     										   }).iterations(2))
-//     .on("tick", function () {
-
-//     			})
-//     .on("end", function () {
+	events.sort(function (a, b) {
+	       	        if (a.time < b.time) {
+	       	            return -1;
+	       	        }
+	       	        if (a.time > b.time) {
+	       	            return 1;
+	       	        }
+	       	        return 0;
+	       });
     	            
   // add nodes for each event
   var nodes = svg
-     .append("g")
-      .attr("class", "event")
-    .selectAll("circle")
-    .data(events)
-    .enter().append("circle");
+		 .append("g")
+		  .attr("class", "event")
+		.selectAll("circle")
+		.data(events)
+		.enter().append("circle")
+		.attr("r",    function (d) {
+						  return d.radius;
+					  })
+		.attr("fill", function (d) {
+						  return d.color;
+					  })
+		.attr("cx", function (d) {
+						return d.x;
+					 })
+		.attr("cy", function (d) {
+						return d.y;
+					 });
 
-   nodes.append("title")
-      .text(function (d) { 
-				return d.title; 
-			});
+    nodes             
+		.append("title")
+		  .text(function (d) { 
+					return d.title; 
+				});
 
 	// add places
     nodes.select("g")
@@ -109,7 +109,7 @@ function animate_events(events, places, options) {
   };
 
   var update = function () {
-  	  	// on every tick move current_period's and previous_period's event sightings into view and move others out
+  	// move current_period's and previous_period's event sightings into view and move others out
   	var date;
 	nodes
        .attr("cx",     function (d) {     	                   
@@ -146,12 +146,26 @@ function animate_events(events, places, options) {
   };
 
   var tick = function() {
-	update();
-    now += 1;
-    if (earliest_time.getTime()+now*period*1000 <= latest_time.getTime() && !paused) {
-    	setTimeout(tick, 1000/periods_per_second);
-    }
+	  update();
+      now++;
+      if (earliest_time.getTime()+now*period*1000 <= latest_time.getTime() && !paused) {
+    	  setTimeout(tick, 1000/periods_per_second);
+      }
   };
+
+  // this didn't work because it ran collision detection for all animal observations so they become very spread out
+//     var simulation = d3.forceSimulation(records)
+//     // based on http://bl.ocks.org/mbostock/31ce330646fa8bcb7289ff3b97aab3f5
+//     .velocityDecay(0.2)
+//     .force("x", d3.forceX().strength(0.002))
+//     .force("y", d3.forceY().strength(0.002))
+//     .force("collide", d3.forceCollide().radius(function(d) { 
+//     											    return d.r + 0.5; 
+//     										   }).iterations(2))
+//     .on("tick", function () {
+
+//     			})
+//     .on("end", function () {
 
   tick();
 
