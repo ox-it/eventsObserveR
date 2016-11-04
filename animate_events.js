@@ -84,7 +84,7 @@ function animate_events(events, places, options) {
   	  // move current_period's and previous_period's event sightings into view and move others out
   	  var date = new Date(earliest_day.getTime()+1000*(now*period+period));
 	  // if integer number of days then just display the date otherwise the date and time
-	  d3.select(time_display).text(period >= 24*60*60 || period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
+	  d3.select(time_display).text(period >= 24*60*60 && period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
 	  nodes
        .attr("cx",     function (d) {     	                   
 						   if (current_period(d.time) || previous_period(d.time)) {
@@ -132,29 +132,106 @@ function animate_events(events, places, options) {
   	  document.body.appendChild(time_display);
   };
 
-  var add_play_button = function () {
-  	  play_button  = document.createElement('button');
-  	  play_button.className = "play-button";
-  	  play_button.innerHTML = "PLAY";
-  	  play_button.addEventListener('click',
-								   function () {
-									   paused = !paused;
-									   if (!paused) {
-									  	   play_button.innerHTML = "PAUSE";
-									       tick(); // resume
-									   } else {
-									 	   play_button.innerHTML = "RESUME";
-									 	   update();
-									   }
-								  });
-  	  document.body.appendChild(play_button);
+  var add_play_buttons = function () {
+  	  var forward         = document.createElement('button');
+  	  var backward        = document.createElement('button');
+  	  var pause           = document.createElement('button');
+  	  var step_forward    = document.createElement('button');
+  	  var step_backward   = document.createElement('button');
+  	  var faster          = document.createElement('button');
+  	  var slower          = document.createElement('button');
+  	  var space           = document.createElement('span');
+  	  var space2          = document.createElement('span');
+  	  var period_input    = document.createElement('span');
+  	  var previous_period = document.createElement('span');
+  	  var br              = document.createElement('br');
+  	  var forward_action   =    function () {
+								     play_direction = 1;
+								     if (paused) {
+								     	paused = false;
+								     	tick();
+								     }
+						         };
+	  var backward_action   =    function () {
+	  	                             play_direction = -1;
+								     if (paused) {
+								     	paused = false;
+								     	tick();
+								     }
+						         };
+	  var pause_action =         function () {
+								     paused = true;
+								     update();
+							     };
+	  var step_forward_action =  function () {
+	                                 now++;
+	                                 update();
+	                             };
+	  var step_backward_action = function () {
+	                                 now--;
+	                                 update();
+	                             };
+	  var faster_action        = function () {
+	  	                             periods_per_second *= Math.sqrt(2);
+	  	                             if (paused) {
+	  	                             	 paused = false;
+	  	                             	 tick();
+	  	                             }
+	                              };
+      var slower_action        = function () {
+	  	                             periods_per_second /= Math.sqrt(2);
+	  	                             if (paused) {
+	  	                              	 paused = false;
+	  	                            	 tick();
+	  	                             }
+	                              };
+	  forward.innerHTML         = '<i class="fa fa-play" aria-hidden="true">';
+	  backward.innerHTML        = '<i class="fa fa-backward" aria-hidden="true">';
+  	  pause.innerHTML           = '<i class="fa fa-pause" aria-hidden="true">';
+  	  step_forward.innerHTML    = '<i class="fa fa-step-forward" aria-hidden="true">';
+  	  step_backward.innerHTML   = '<i class="fa fa-step-backward" aria-hidden="true">';
+  	  faster.innerHTML          = '<b class="event-replay-button">Faster</b>';
+  	  slower.innerHTML          = '<b class="event-replay-button">Slower</b>';
+  	  space.innerHTML           = '&nbsp;&nbsp;';
+  	  space2.innerHTML          = '&nbsp;&nbsp;';
+  	  period_input.innerHTML    = '<label class="event-number-input" title="View all events that occured within this period of time.">' + 
+  	                              'Period (in seconds): ' + 
+  	                              '<input class="event-number-input" type="number" value="' + period + '"></label>';
+  	  previous_period.innerHTML = '<label class="event-number-input" title="Display the previous events as hollow circles that occured within this many seconds before now. If 0 will not be displayed.">' +
+  	                              '&nbsp;Previous period: ' +
+  	                              '<input class="event-number-input" type="number" value="' + previous_period_duration + '"></label>';
+  	  forward.addEventListener('click', forward_action);
+  	  backward.addEventListener('click', backward_action);
+	  pause.addEventListener('click', pause_action);
+	  step_forward.addEventListener('click', step_forward_action);
+	  step_backward.addEventListener('click', step_backward_action);
+	  faster.addEventListener('click', faster_action);
+	  slower.addEventListener('click', slower_action);
+	  period_input.addEventListener('change', function (event) {
+	  	  period                   = +event.srcElement.value;
+	  });
+	  previous_period.addEventListener('change', function (event) {
+	  	  previous_period_duration = +event.srcElement.value;
+	  });	  
+	  document.body.appendChild(br);
+	  document.body.appendChild(backward);
+  	  document.body.appendChild(step_backward);
+  	  document.body.appendChild(pause);
+  	  document.body.appendChild(step_forward);
+  	  document.body.appendChild(forward);
+  	  document.body.appendChild(space);
+  	  document.body.appendChild(faster);
+  	  document.body.appendChild(slower);
+  	  document.body.appendChild(space2);
+  	  document.body.appendChild(period_input);
+  	  document.body.appendChild(previous_period);
   };
 
-  var nodes, svg, earliest_time, latest_time, earliest_day, play_button, time_display;
+  var nodes, svg, earliest_time, latest_time, earliest_day, time_display;
 
     add_time_display();  
     document.body.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "svg"));
-    add_play_button();
+    add_play_buttons();
 
 	svg = d3.select("svg")
 				  .attr("width",  width)

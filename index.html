@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
-
+<script src="https://use.fontawesome.com/6124f35d24.js"></script>
 <script src="animate_events.js"></script>
 
 <link href="animate_events.css" rel="stylesheet" type="text/css" />
@@ -59,8 +59,8 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	   function(error, data) {
 	   	   var animal_observations = [];
 	   	   var max_event_type_id = 0;
-	   	   var width  = 600;
-	       var height = 600;
+	   	   var width  = 550;
+	       var height = 550;
 	   	   if (error) throw error;
 	       data.forEach(function(event) {
 	       				    if (event) {
@@ -74,7 +74,7 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	       var station_positions = stations.map(function (station, index) {
 	       	   var theta = 2 * Math.PI / stations.length;
 	       	   var rotation = -Math.PI / 2; // so the first camera is at 12 o'clock
-	       	   var margin = 100;
+	       	   var margin = 80;
                return {x: (width /2-margin) * Math.cos(index * theta + rotation)+width/2, 
                        y: (height/2-margin) * Math.sin(index * theta + rotation)+height/2,
                        radius: Math.min(width, height)/60,

@@ -1,9 +1,12 @@
 button {
-	font-family: Segoe UI,Arial,sans-serif;
-	font-size: 1.1em;
-	font-weight: bold;
+	font-size: 1.2em;
 	border-radius: 6px;
 	cursor: pointer;
+}
+.event-replay-button, .event-number-input {
+	font-family: Segoe UI,Arial,sans-serif;
+	font-weight: bold;	
+	font-size: 1em;
 }
 p {
 	font-family: Segoe UI,Arial,sans-serif;
