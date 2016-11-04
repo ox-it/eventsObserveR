@@ -1,0 +1,14 @@
+button {
+	font-family: Segoe UI,Arial,sans-serif;
+	font-size: 1.1em;
+	font-weight: bold;
+	border-radius: 6px;
+	cursor: pointer;
+}
+p {
+	font-family: Segoe UI,Arial,sans-serif;
+	font-size: 1.1em;
+}
+.event circle {
+    stroke-width: 1.5px;
+}

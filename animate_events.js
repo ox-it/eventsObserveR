@@ -13,41 +13,12 @@ function animate_events(events, places, options) {
 	var period                   = options.period                   || 24*60*60; // in seconds
 	var previous_period_duration = options.previous_period_duration === undefined ? period : options.previous_period_duration;
 
-	var paused            = false;
+	var paused            = true;
+	var play_direction    = 1; // forward one period
 	var formatDate        = d3.timeFormat("%d %b %Y");
 	var formatCurrentTime = d3.timeFormat("%d %b %y %H:%M:%S");
 
-	var svg = d3.select("svg")
-				  .attr("width",  width)
-				  .attr("height", height);
-
-	var earliest_time, latest_time, earliest_day;
-
-	events.forEach(function (event) {
-		   if (!earliest_time || event.time < earliest_time) {
-			   earliest_time = event.time;		   	  
-		   }
-		   if (!latest_time || event.time > latest_time) {
-			   latest_time = event.time;
-		   }
-	});
-
-	earliest_day = new Date(earliest_time);
-	earliest_day.setHours(0);
-	earliest_day.setMinutes(0);
-	earliest_day.setSeconds(0);
-
-	events.sort(function (a, b) {
-	       	        if (a.time < b.time) {
-	       	            return -1;
-	       	        }
-	       	        if (a.time > b.time) {
-	       	            return 1;
-	       	        }
-	       	        return 0;
-	       });
-
-	  var handle_collisions = function () {
+    var handle_collisions = function () {
 	  	  var now = 0;
 		  var end_time = new Date(earliest_day.getTime()+(now*period*1000));
 		  var events_from_this_period = [];
@@ -68,11 +39,7 @@ function animate_events(events, places, options) {
 		  	  var arc_length = 0;
 		  	  events_at_same_place.forEach(function (event) {
 		  	  	 circumference += event.radius*2;
-// 		  	  	 if (event.radius > max_radius) {
-// 		  	  	 	 max_radius = event.radius;
-// 		  	  	 }
-		  	  });
-		  	  // radius_sum is approximately half the circumference   	  
+		  	  }); 	  
 		  	  radius = circumference / (2 * Math.PI);
 		  	  events_at_same_place.forEach(function (event) { 
 		  	      // fraction of the circle to the center of the current circle
@@ -100,10 +67,127 @@ function animate_events(events, places, options) {
 			            });
 	  };
 
+  var now = 0;
+
+  var current_period = function (time) {
+  	  return time-earliest_day > 1000*(now*period) &&
+      	     time-earliest_day < 1000*(now*period+period);
+  };
+
+  var previous_period = function (time) {
+  	  return paused &&
+  	         time-earliest_day > 1000*(now*period-previous_period_duration) &&
+      	     time-earliest_day < 1000*(now*period);
+  };
+
+  var update = function () {
+  	  // move current_period's and previous_period's event sightings into view and move others out
+  	  var date = new Date(earliest_day.getTime()+1000*(now*period+period));
+	  // if integer number of days then just display the date otherwise the date and time
+	  d3.select(time_display).text(period >= 24*60*60 || period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
+	  nodes
+       .attr("cx",     function (d) {     	                   
+						   if (current_period(d.time) || previous_period(d.time)) {
+							   return d.x;
+						   }
+						   return -1000; // offscreen
+					   })
+       .attr("cy",     function (d) {
+						   if (current_period(d.time) || previous_period(d.time)) {
+							   return d.y;
+						   }
+						   return -1000; // offscreen
+					   })
+	    // current_period's are solid coloured circles with a white border and yesterday's are white with a coloured border
+       .attr("fill",   function (d) {
+						   if (previous_period(d.time)) {
+							   return 'white';
+						   }
+						   return d.color;
+					   })
+	   .attr("stroke", function (d) {
+						   if (previous_period(d.time)) {
+							   return d.color;
+						   }
+						   return 'white';
+					   })
+	   .attr("r",     function (d) {
+      	                  return d.radius;
+                      });
+  };
+
+  var tick = function() {
+	  update();
+	  if (paused) {
+	  	  return;
+	  }
+      now += play_direction;
+      if (earliest_time.getTime()+now*period*1000 <= latest_time.getTime() && now >= 0) {
+    	  setTimeout(tick, 1000/periods_per_second);
+      }
+  };
+
+  var add_time_display = function () {
+  	  time_display = document.createElement('p');
+  	  document.body.appendChild(time_display);
+  };
+
+  var add_play_button = function () {
+  	  play_button  = document.createElement('button');
+  	  play_button.className = "play-button";
+  	  play_button.innerHTML = "PLAY";
+  	  play_button.addEventListener('click',
+								   function () {
+									   paused = !paused;
+									   if (!paused) {
+									  	   play_button.innerHTML = "PAUSE";
+									       tick(); // resume
+									   } else {
+									 	   play_button.innerHTML = "RESUME";
+									 	   update();
+									   }
+								  });
+  	  document.body.appendChild(play_button);
+  };
+
+  var nodes, svg, earliest_time, latest_time, earliest_day, play_button, time_display;
+
+    add_time_display();  
+    document.body.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "svg"));
+    add_play_button();
+
+	svg = d3.select("svg")
+				  .attr("width",  width)
+				  .attr("height", height);
+
+	events.forEach(function (event) {
+		   if (!earliest_time || event.time < earliest_time) {
+			   earliest_time = event.time;		   	  
+		   }
+		   if (!latest_time || event.time > latest_time) {
+			   latest_time = event.time;
+		   }
+	});
+
+	earliest_day = new Date(earliest_time);
+	earliest_day.setHours(0);
+	earliest_day.setMinutes(0);
+	earliest_day.setSeconds(0);
+
+	events.sort(function (a, b) {
+	       	        if (a.time < b.time) {
+	       	            return -1;
+	       	        }
+	       	        if (a.time > b.time) {
+	       	            return 1;
+	       	        }
+	       	        return 0;
+	       });
+
 	  handle_collisions();
     	            
     // add nodes for each event
-    var nodes = svg
+    nodes = svg
 		 .append("g")
 		  .attr("class", "event")
 		.selectAll("circle")
@@ -150,76 +234,8 @@ function animate_events(events, places, options) {
         return -1;
     });
 
-  var now = 0;
-
-  var current_period = function (time) {
-  	  return time-earliest_day > 1000*(now*period) &&
-      	     time-earliest_day < 1000*(now*period+period);
-  };
-
-  var previous_period = function (time) {
-  	  return paused &&
-  	         time-earliest_day > 1000*(now*period-previous_period_duration) &&
-      	     time-earliest_day < 1000*(now*period);
-  };
-
-  var update = function () {
-  	  // move current_period's and previous_period's event sightings into view and move others out
-  	  var date = new Date(earliest_day.getTime()+1000*(now*period+period));
-	  // if integer number of days then just display the date otherwise the date and time
-	  d3.select("#current_time").text(period >= 24*60*60 || period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
-	  nodes
-       .attr("cx",     function (d) {     	                   
-						   if (current_period(d.time) || previous_period(d.time)) {
-							   return d.x;
-						   }
-						   return -1000; // offscreen
-					   })
-       .attr("cy",     function (d) {
-						   if (current_period(d.time) || previous_period(d.time)) {
-							   return d.y;
-						   }
-						   return -1000; // offscreen
-					   })
-	    // current_period's are solid coloured circles with a white border and yesterday's are white with a coloured border
-       .attr("fill",   function (d) {
-						   if (previous_period(d.time)) {
-							   return 'white';
-						   }
-						   return d.color;
-					   })
-	   .attr("stroke", function (d) {
-						   if (previous_period(d.time)) {
-							   return d.color;
-						   }
-						   return 'white';
-					   })
-	   .attr("r",     function (d) {
-      	                  return d.radius;
-                      });
-  };
-
-  var tick = function() {
-	  update();
-      now++;
-      if (earliest_time.getTime()+now*period*1000 <= latest_time.getTime() && !paused) {
-    	  setTimeout(tick, 1000/periods_per_second);
-      }
-  };
-
-
-tick();
-
-    // should R do this or should this be a button?
-    document.body.addEventListener('click',
-								   function () {
-									   paused = !paused;
-									   if (!paused) {
-									      tick(); // resume
-									   } else {
-									 	  update();
-									   }
-								  });
+    update();
+    
 };
 
 // the following was extremely slow and pushed circles too far apart
