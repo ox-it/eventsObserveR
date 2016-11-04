@@ -11,7 +11,7 @@ function animate_events(events, places, options) {
 	var height                   = options.height                   ||  600;
 	var periods_per_second       = options.periods_per_second       ||  100;
 	var period                   = options.period                   || 24*60*60; // in seconds
-	var previous_period_duration = options.previous_period_duration === undefined ? options.previous_period_duration : period;
+	var previous_period_duration = options.previous_period_duration === undefined ? period : options.previous_period_duration;
 
 	var paused            = false;
 	var formatDate        = d3.timeFormat("%d %b %Y");
@@ -46,9 +46,64 @@ function animate_events(events, places, options) {
 	       	        }
 	       	        return 0;
 	       });
+
+	  var handle_collisions = function () {
+	  	  var now = 0;
+		  var end_time = new Date(earliest_day.getTime()+(now*period*1000));
+		  var events_from_this_period = [];
+		  var locations_to_events = [];
+		  var spreadout_events_with_the_same_location = function () {
+			  if (events_from_this_period.length < 2) {
+			  	  return;
+			  }
+			  Object.keys(locations_to_events).map(function (key) {
+			  	 if (locations_to_events[key].length > 1) {
+			  	 	spreadout(locations_to_events[key]);
+			  	 }
+			  });
+		  };
+		  var spreadout = function (events_at_same_place) {
+		  	  var circumference = 0;		  	  
+		  	  var radius = 0;
+		  	  var arc_length = 0;
+		  	  events_at_same_place.forEach(function (event) {
+		  	  	 circumference += event.radius*2;
+// 		  	  	 if (event.radius > max_radius) {
+// 		  	  	 	 max_radius = event.radius;
+// 		  	  	 }
+		  	  });
+		  	  // radius_sum is approximately half the circumference   	  
+		  	  radius = circumference / (2 * Math.PI);
+		  	  events_at_same_place.forEach(function (event) { 
+		  	      // fraction of the circle to the center of the current circle
+		  	      var angle = (arc_length+event.radius) * 2 * Math.PI / circumference;
+		  	  	  event.x += radius * Math.cos(angle);
+		  	  	  event.y += radius * Math.sin(angle);
+		  	  	  arc_length += event.radius*2;  
+		  	  });
+		  };
+	      events.forEach(function (event, index) {
+							  if (event.time < end_time) {
+								  events_from_this_period.push(event);
+								  if (locations_to_events[event.place_id]) {
+									  locations_to_events[event.place_id].push(event);
+								  } else {
+									  locations_to_events[event.place_id] = [event];
+								  }
+							  } else {
+								  spreadout_events_with_the_same_location();
+								  now++;
+								  end_time = new Date(earliest_day.getTime()+(now*period*1000));
+								  events_from_this_period = [];
+								  locations_to_events = [];
+							  }
+			            });
+	  };
+
+	  handle_collisions();
     	            
-  // add nodes for each event
-  var nodes = svg
+    // add nodes for each event
+    var nodes = svg
 		 .append("g")
 		  .attr("class", "event")
 		.selectAll("circle")
@@ -109,9 +164,11 @@ function animate_events(events, places, options) {
   };
 
   var update = function () {
-  	// move current_period's and previous_period's event sightings into view and move others out
-  	var date;
-	nodes
+  	  // move current_period's and previous_period's event sightings into view and move others out
+  	  var date = new Date(earliest_day.getTime()+1000*(now*period+period));
+	  // if integer number of days then just display the date otherwise the date and time
+	  d3.select("#current_time").text(period >= 24*60*60 || period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
+	  nodes
        .attr("cx",     function (d) {     	                   
 						   if (current_period(d.time) || previous_period(d.time)) {
 							   return d.x;
@@ -140,9 +197,6 @@ function animate_events(events, places, options) {
 	   .attr("r",     function (d) {
       	                  return d.radius;
                       });
-    date = new Date(earliest_day.getTime()+1000*(now*period+period));
-	// integer number of days then just display the date otherwise the date and time
-	d3.select("#current_time").text(period >= 24*60*60 || period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
   };
 
   var tick = function() {
@@ -153,30 +207,65 @@ function animate_events(events, places, options) {
       }
   };
 
-  // this didn't work because it ran collision detection for all animal observations so they become very spread out
-//     var simulation = d3.forceSimulation(records)
-//     // based on http://bl.ocks.org/mbostock/31ce330646fa8bcb7289ff3b97aab3f5
-//     .velocityDecay(0.2)
-//     .force("x", d3.forceX().strength(0.002))
-//     .force("y", d3.forceY().strength(0.002))
-//     .force("collide", d3.forceCollide().radius(function(d) { 
-//     											    return d.r + 0.5; 
-//     										   }).iterations(2))
-//     .on("tick", function () {
 
-//     			})
-//     .on("end", function () {
+tick();
 
-  tick();
-
-  // should R do this or should this be a button?
-  document.body.addEventListener('click',
-								 function () {
-									 paused = !paused;
-									 if (!paused) {
-									    tick(); // resume
-									 } else {
-									 	update();
-									 }
-								 });
+    // should R do this or should this be a button?
+    document.body.addEventListener('click',
+								   function () {
+									   paused = !paused;
+									   if (!paused) {
+									      tick(); // resume
+									   } else {
+									 	  update();
+									   }
+								  });
 };
+
+// the following was extremely slow and pushed circles too far apart
+//   var events_index = 0;
+
+//   var handle_collisions = function (now) {
+//   	  var end_time = new Date(earliest_time.getTime()+(now*period*1000));
+//   	  var events_from_this_period = [];
+//   	  events.some(function (event, index) {
+//   	  	  if (index < events_index) {
+//   	  	  	  // already processed
+//   	  	  } else if (event.time <= end_time) {
+// //   	  	  	  event.vx = 2.5;
+// //   	  	  	  event.vy = 2.5;
+//   	  	  	  events_from_this_period.push(event);
+//   	  	  } else {
+//   	  	      events_index = index;
+//   	  	  	  return true;
+//   	  	  }
+//   	  });
+//   	  if (events_index === events.length-1) {
+//   	  	  tick();
+//   	  	  return;
+//   	  }
+//   	  if (events_from_this_period.length < 2) {
+//   	  	  handle_collisions(now+1);
+//   	  	  return;
+//   	  }
+//   	  console.log(events_from_this_period.length)
+//       d3.forceSimulation(events_from_this_period)
+// 		// based on http://bl.ocks.org/mbostock/31ce330646fa8bcb7289ff3b97aab3f5
+// 		.velocityDecay(0.2)
+// 		.force("x", d3.forceX().strength(0.002))
+// 		.force("y", d3.forceY().strength(0.002))
+// 		.force("collide", d3.forceCollide().radius(function(d) { 
+// 														return d.radius + 0.5; 
+// 												   }).iterations(2))
+// 		.on("tick", function (d) {
+// 					})
+// 		.on("end", function () {
+// 					   if (events_index < events.length-1) {
+// 						   handle_collisions(now+1);
+// 					   } else {
+// 					   	   tick();
+// 					   }
+// 			});
+//     };
+
+//     handle_collisions(0);
