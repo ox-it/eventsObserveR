@@ -44,8 +44,8 @@ function animate_events(events, places, options) {
 		  	  events_at_same_place.forEach(function (event) { 
 		  	      // fraction of the circle to the center of the current circle
 		  	      var angle = (arc_length+event.radius) * 2 * Math.PI / circumference;
-		  	  	  event.x += radius * Math.cos(angle);
-		  	  	  event.y += radius * Math.sin(angle);
+		  	  	  event.x = event.original_x + radius * Math.cos(angle);
+		  	  	  event.y = event.original_y + radius * Math.sin(angle);
 		  	  	  arc_length += event.radius*2;  
 		  	  });
 		  };
@@ -70,14 +70,14 @@ function animate_events(events, places, options) {
   var now = 0;
 
   var current_period = function (time) {
-  	  return time-earliest_day > 1000*(now*period) &&
-      	     time-earliest_day < 1000*(now*period+period);
+  	  return time-earliest_day >= 1000*(now*period) &&
+      	     time-earliest_day <  1000*(now*period+period);
   };
 
   var previous_period = function (time) {
   	  return paused &&
-  	         time-earliest_day > 1000*(now*period-previous_period_duration) &&
-      	     time-earliest_day < 1000*(now*period);
+  	         time-earliest_day >= 1000*(now*period-previous_period_duration) &&
+      	     time-earliest_day <  1000*(now*period);
   };
 
   var update = function () {
@@ -209,6 +209,7 @@ function animate_events(events, places, options) {
 	  slower.addEventListener('click', slower_action);
 	  period_input.addEventListener('change', function (event) {
 	  	  period                   = +event.srcElement.value;
+	  	  handle_collisions();
 	  });
 	  previous_period.addEventListener('change', function (event) {
 	  	  previous_period_duration = +event.srcElement.value;
@@ -244,6 +245,8 @@ function animate_events(events, places, options) {
 		   if (!latest_time || event.time > latest_time) {
 			   latest_time = event.time;
 		   }
+		   event.original_x = event.x;
+		   event.original_y = event.y;
 	});
 
 	earliest_day = new Date(earliest_time);
