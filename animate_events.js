@@ -148,15 +148,15 @@ function animate_events(events, places, options) {
   	  var forward_action   =    function () {
 								     play_direction = 1;
 								     if (paused) {
-								     	paused = false;
-								     	tick();
+								     	 paused = false;
+								     	 tick();
 								     }
 						         };
 	  var backward_action   =    function () {
 	  	                             play_direction = -1;
 								     if (paused) {
-								     	paused = false;
-								     	tick();
+								     	 paused = false;
+								     	 tick();
 								     }
 						         };
 	  var pause_action =         function () {
@@ -173,18 +173,26 @@ function animate_events(events, places, options) {
 	                             };
 	  var faster_action        = function () {
 	  	                             periods_per_second *= Math.sqrt(2);
+	  	                             update_faster_title();
 	  	                             if (paused) {
 	  	                             	 paused = false;
 	  	                             	 tick();
 	  	                             }
-	                              };
+	                             };
       var slower_action        = function () {
 	  	                             periods_per_second /= Math.sqrt(2);
+	  	                             update_slower_title();
 	  	                             if (paused) {
 	  	                              	 paused = false;
 	  	                            	 tick();
 	  	                             }
 	                              };
+	  var update_faster_title = function () {
+	  	  faster.title = "Speed is " + periods_per_second.toPrecision(4) + " periods per second. Click to go faster.";
+	  };
+	  var update_slower_title = function () {
+	  	  slower.title = "Speed is " + periods_per_second.toPrecision(4) + " periods per second. Click to go slower.";
+	  };
 	  forward.innerHTML         = '<i class="fa fa-play" aria-hidden="true">';
 	  backward.innerHTML        = '<i class="fa fa-backward" aria-hidden="true">';
   	  pause.innerHTML           = '<i class="fa fa-pause" aria-hidden="true">';
@@ -226,6 +234,8 @@ function animate_events(events, places, options) {
   	  document.body.appendChild(space2);
   	  document.body.appendChild(period_input);
   	  document.body.appendChild(previous_period);
+  	  update_faster_title();
+  	  update_slower_title();
   };
 
   var nodes, svg, earliest_time, latest_time, earliest_day, time_display;
