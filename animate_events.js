@@ -17,6 +17,7 @@ function animate_events(events, places, options) {
 	var play_direction    = 1; // forward one period
 	var formatDate        = d3.timeFormat("%d %b %Y");
 	var formatCurrentTime = d3.timeFormat("%d %b %y %H:%M:%S");
+	var inactive_event_types = [];
 
     var handle_collisions = function () {
 	  	  var now = 0;
@@ -28,9 +29,9 @@ function animate_events(events, places, options) {
 			  	  return;
 			  }
 			  Object.keys(locations_to_events).map(function (key) {
-			  	 if (locations_to_events[key].length > 1) {
-			  	 	spreadout(locations_to_events[key]);
-			  	 }
+			  	  if (locations_to_events[key].length > 1) {
+			  	 	 spreadout(locations_to_events[key]);
+			  	  }
 			  });
 		  };
 		  var spreadout = function (events_at_same_place) {
@@ -38,7 +39,7 @@ function animate_events(events, places, options) {
 		  	  var radius = 0;
 		  	  var arc_length = 0;
 		  	  events_at_same_place.forEach(function (event) {
-		  	  	 circumference += event.radius*2;
+		  	  	  circumference += event.radius*2;
 		  	  }); 	  
 		  	  radius = circumference / (2 * Math.PI);
 		  	  events_at_same_place.forEach(function (event) { 
@@ -51,12 +52,14 @@ function animate_events(events, places, options) {
 		  };
 	      events.forEach(function (event, index) {
 							  if (event.time < end_time) {
-								  events_from_this_period.push(event);
-								  if (locations_to_events[event.place_id]) {
-									  locations_to_events[event.place_id].push(event);
-								  } else {
-									  locations_to_events[event.place_id] = [event];
-								  }
+							  	  if (inactive_event_types.indexOf(event.color) < 0) {
+									  events_from_this_period.push(event);
+									  if (locations_to_events[event.place_id]) {
+										  locations_to_events[event.place_id].push(event);
+									  } else {
+										  locations_to_events[event.place_id] = [event];
+									  }
+							  	  }
 							  } else {
 								  spreadout_events_with_the_same_location();
 								  now++;
@@ -86,13 +89,19 @@ function animate_events(events, places, options) {
 	  // if integer number of days then just display the date otherwise the date and time
 	  d3.select(time_display).text(period >= 24*60*60 && period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
 	  nodes
-       .attr("cx",     function (d) {     	                   
+       .attr("cx",     function (d) {
+       	                   if (inactive_event_types.indexOf(d.color) >= 0) {
+       	                   	   return -1000;
+       	                   }   	                   
 						   if (current_period(d.time) || previous_period(d.time)) {
 							   return d.x;
 						   }
 						   return -1000; // offscreen
 					   })
        .attr("cy",     function (d) {
+       	       	           if (inactive_event_types.indexOf(d.color) >= 0) {
+       	                   	   return -1000;
+       	                   } 
 						   if (current_period(d.time) || previous_period(d.time)) {
 							   return d.y;
 						   }
@@ -196,6 +205,42 @@ function animate_events(events, places, options) {
 	  var update_slower_title = function () {
 	  	  slower.title = "Speed is " + periods_per_second.toPrecision(4) + " periods per second. Click to go slower.";
 	  };
+	  var create_legend = function (columns) {
+	  	  var table = document.createElement('table');
+	  	  var row;
+	  	  table.className = "event-legend";
+	  	  options.legend.forEach(function (entry, index) {
+	  	  	  var key         = document.createElement('td');
+	  	  	  var description = document.createElement('td');
+	  	  	  if (index%columns === 0) {
+	  	  	      row = document.createElement('tr');
+	  	  	      table.appendChild(row);
+	  	  	  }
+	  	  	  key.innerHTML = '<i class="fa fa-circle" aria-hidden="true"></i>';
+	  	  	  key.style.color = entry.color;
+	  	  	  key.className = "event-key-active";
+	  	  	  key.addEventListener('click',
+	  	  	                       function () {
+	  	  	                       	   // toggle whether active
+	  	  	                       	   var index = inactive_event_types.indexOf(entry.color);
+	  	  	                       	   if (index >= 0) {
+	  	  	                       	   	   inactive_event_types.splice(index, 1);
+	  	  	                       	   	   key.className = "event-key-active";
+	  	  	                       	   } else {
+	  	  	                       	   	   inactive_event_types.push(entry.color);
+	  	  	                       	   	   key.className = "event-key-inactive";
+	  	  	                       	   }
+	  	  	                       	   handle_collisions();
+	  	  	                       	   update();
+	  	  	                       });
+	  	  	  key.title = "Click to toggle whether this is included or not.";
+	  	  	  description.innerHTML = entry.description;
+	  	  	  description.className = "event-legend-description";
+	  	  	  row.appendChild(key);
+	  	  	  row.appendChild(description);
+	  	  });
+	  	  return table;
+	  }
 	  forward.innerHTML         = '<i class="fa fa-play" aria-hidden="true">';
 	  backward.innerHTML        = '<i class="fa fa-backward" aria-hidden="true">';
   	  pause.innerHTML           = '<i class="fa fa-pause" aria-hidden="true">';
@@ -224,7 +269,11 @@ function animate_events(events, places, options) {
 	  });
 	  previous_period.addEventListener('change', function (event) {
 	  	  previous_period_duration = +event.srcElement.value;
-	  });	  
+	  });
+	  if (options.legend) {
+  	  	  // move to next to svg later...
+  	  	  document.body.appendChild(create_legend(2));
+  	  }	  
 	  document.body.appendChild(br);
 	  document.body.appendChild(backward);
   	  document.body.appendChild(step_backward);
@@ -239,12 +288,15 @@ function animate_events(events, places, options) {
   	  document.body.appendChild(previous_period);
   	  update_faster_title();
   	  update_slower_title();
+  	  
   };
+
+  var svg_element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
   var nodes, svg, earliest_time, latest_time, earliest_day, time_display;
 
     add_time_display();  
-    document.body.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "svg"));
+    document.body.appendChild(svg_element);
     add_play_buttons();
 
 	svg = d3.select("svg")

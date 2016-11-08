@@ -58,6 +58,7 @@ d3.csv("../../WildCRUData/WildCRU.csv",
        },
 	   function(error, data) {
 	   	   var animal_observations = [];
+	   	   var legend = [];
 	   	   var max_event_type_id = 0;
 	   	   var width  = 750;
 	       var height = 550;
@@ -87,12 +88,16 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	       	   d.y = station_positions[d.place_id].y;
 	       	   d.color = color(d.event_type_id/max_event_type_id);
 	       });
-
+	       legend = d3.range(max_event_type_id).map(function (id) {
+	       												return {color: color(id/max_event_type_id),
+	       												        description: species[id]};
+	       });
 	       animate_events(animal_observations, station_positions, {width:  width, 
 	                                                               height: height,
 	                                                               period:                   24*60*60,
 	                                                               previous_period_duration: 24*60*60,
-	                                                               periods_per_second: 24});
+	                                                               periods_per_second: 24,
+	                                                               legend: legend});
 	   });
 
 }());

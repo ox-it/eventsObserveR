@@ -15,3 +15,18 @@ p {
 .event circle {
     stroke-width: 1.5px;
 }
+.event-legend {
+	display: inline-block;
+	vertical-align: top;
+}
+.event-legend-description {
+	padding-right: 16px;
+}
+.event-key-inactive {
+	opacity: .1;
+	cursor: pointer;
+}
+.event-key-active {
+	opacity: 1;
+	cursor: pointer;
+}
