@@ -59,7 +59,7 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	   function(error, data) {
 	   	   var animal_observations = [];
 	   	   var max_event_type_id = 0;
-	   	   var width  = 550;
+	   	   var width  = 750;
 	       var height = 550;
 	   	   if (error) throw error;
 	       data.forEach(function(event) {
@@ -74,9 +74,10 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	       var station_positions = stations.map(function (station, index) {
 	       	   var theta = 2 * Math.PI / stations.length;
 	       	   var rotation = -Math.PI / 2; // so the first camera is at 12 o'clock
-	       	   var margin = 80;
-               return {x: (width /2-margin) * Math.cos(index * theta + rotation)+width/2, 
-                       y: (height/2-margin) * Math.sin(index * theta + rotation)+height/2,
+	       	   var horizontal_margin = 200;
+	       	   var vertical_margin   = 100;
+               return {x: (width /2-horizontal_margin) * Math.cos(index * theta + rotation)+width/2, 
+                       y: (height/2-vertical_margin)   * Math.sin(index * theta + rotation)+height/2,
                        radius: Math.min(width, height)/60,
 		               color:  'rgba(0, 0, 0, .05)',
 		               id: index};
@@ -88,7 +89,8 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	       });
 
 	       animate_events(animal_observations, station_positions, {width:  width, 
-	                                                               height: height, 
+	                                                               height: height,
+	                                                               period:                   24*60*60,
 	                                                               previous_period_duration: 24*60*60,
 	                                                               periods_per_second: 24});
 	   });
