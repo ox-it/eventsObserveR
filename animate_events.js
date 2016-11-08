@@ -124,6 +124,9 @@ function animate_events(events, places, options) {
       now += play_direction;
       if (earliest_time.getTime()+now*period*1000 <= latest_time.getTime() && now >= 0) {
     	  setTimeout(tick, 1000/periods_per_second);
+      } else {
+      	  // since got the end of the log
+      	  paused = true;
       }
   };
 
