@@ -1,6 +1,6 @@
 #' @import htmlwidgets
 #' @export
-animateEvents <- function(events, 
+eventsObserveR <- function(events, 
                           places, 
                           periodsPerSecond = 24,
                           period = 86400,
@@ -23,18 +23,18 @@ animateEvents <- function(events,
   )
   
   # create the widget
-  htmlwidgets::createWidget("animateEvents", 
+  htmlwidgets::createWidget("eventsObserveR", 
                             x,
                             width = width,
                             height = height)
 }
 
 #' @export
-animateEventsOutput <- function(outputId, width = "100%", height = "400px") {
-  shinyWidgetOutput(outputId, "animateEvents", width, height, package = "animate_movement")
+eventsObserverOutput <- function(outputId, width = "100%", height = "400px") {
+  shinyWidgetOutput(outputId, "eventsObserveR", width, height, package = "eventsObserveR")
 }
 #' @export
-renderAnimateEvents <- function(expr, env = parent.frame(), quoted = FALSE) {
+renderEventsObserver <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
-  shinyRenderWidget(expr, animateEventsOutput, env, quoted = TRUE)
+  shinyRenderWidget(expr, eventsObserverOutput, env, quoted = TRUE)
 }
