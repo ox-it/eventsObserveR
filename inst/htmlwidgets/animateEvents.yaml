@@ -4,3 +4,5 @@ dependencies:
     src: htmlwidgets/lib
     script: 
       - animate_events.js
+      - d3.v4.min.js
+      - fontawesome.js

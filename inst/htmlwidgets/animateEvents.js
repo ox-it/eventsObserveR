@@ -14,23 +14,28 @@ HTMLWidgets.widget({
           
         // parse data
         var parser = new DOMParser();
-        var data = parser.parseFromString(x.data, "application/xml");
-        animateEventsWidget.initialise(x.events, x.places, x.settings);
+        var events = HTMLWidgets.dataframeToD3(x.events);
+        
+        var places = HTMLWidgets.dataframeToD3(x.places);
+
+        var settings = x.settings;
+
+        animateEventsWidget.initialise(events, places, settings);
         animateEventsWidget.refresh();
       },
       
       resize: function(width, height) {
-        
+        console.log("inside of resize");
         // forward resize on to animateEvents renderers
-        for (var name in animateEventsWidget.renderers)
-          animateEventsWidget.renderers[name].resize(width, height);  
+//        for (var name in animateEventsWidget.renderers)
+//          animateEventsWidget.renderers[name].resize(width, height);  
       },
       
       // Make the animateEvents object available as a property on the widget
       // instance we're returning from factory(). This is generally a
       // good idea for extensibility--it helps users of this widget
       // interact directly with animateEvents, if needed.
-      s: animateEventsWidget
+      aE: animateEventsWidget
     };
   }
 });

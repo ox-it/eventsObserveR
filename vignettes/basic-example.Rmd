@@ -1,0 +1,76 @@
+---
+title: "Vignette Title"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+<!-- ANY PACKAGES USED HERE MUST BE LOADED IN THE DESCRIPTION FILE AS WELL !-->
+
+While developing, cheat and use this to reload
+
+```{r}
+devtools::install()
+library(animateEvents)
+```
+
+# Design data structure
+
+## Events
+
+This is the R version of the events data
+
+```{r}
+events <- data.frame(
+  color = rep('rgba(0, 0, 0, .05)',5),
+  place_id = 0:4, 
+  x = seq(100, 500, 100),
+  y = seq(100, 500, 100),
+  event_type_id = 1:5,
+  time = 1e6 * 1:5,
+  radius = 5,
+  stringsAsFactors = F
+)
+```
+
+Within the htmlwidget we convert this into JSON that D3 will like using `HTMLWidgets.dataframeToD3`
+
+## Places
+
+```{r}
+places = data.frame(
+  id = 0:4,
+  x = seq(100, 500, 100),
+  y = seq(100, 500, 100),
+  radius = rep(10,5),
+  color = rep('rgba(0, 0, 0, .05)',5)
+)
+
+```
+
+# Make Emre's data good
+
+```{r}
+emre_data <- read.csv("data-raw/FOQMRuVAifoTmfWMDgsz6a.csv", stringsAsFactors = F)
+```
+
+```{r}
+emre_data %>%
+  select()
+```
+
+
+# Run Code
+
+```{r}
+animateEvents(events = events,
+              places = places,
+              period = 1000,
+              width = 600,
+              height = 600)
+```
+
