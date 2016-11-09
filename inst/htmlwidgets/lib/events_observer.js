@@ -6,6 +6,7 @@
 function create_event_animator(element) {
 	var widget;
 	return {initialise: function (events, places, options) {
+	            element.innerHTML = "";
 							widget = animate_events(events, places, options, element);
 	                    },
 	        refresh: function () {
