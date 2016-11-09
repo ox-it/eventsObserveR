@@ -1,6 +1,6 @@
 HTMLWidgets.widget({
 
-  name: "animateEvents",
+  name: "eventsObserveR",
   
   type: "output",
   
