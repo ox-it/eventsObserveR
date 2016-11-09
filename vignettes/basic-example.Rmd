@@ -15,7 +15,7 @@ While developing, cheat and use this to reload
 
 ```{r}
 devtools::install()
-library(animateEvents)
+library(eventsObserveR)
 ```
 
 # Design data structure
@@ -67,7 +67,7 @@ emre_data %>%
 # Run Code
 
 ```{r}
-animateEvents(events = events,
+eventsObserveR(events = events,
               places = places,
               period = 1000,
               width = 600,
