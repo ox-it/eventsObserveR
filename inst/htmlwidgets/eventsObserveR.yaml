@@ -1,0 +1,8 @@
+dependencies:
+  - name: eventsObserveR
+    version: 1.0.0
+    src: htmlwidgets/lib
+    script: 
+      - events_observer.js
+      - d3.v4.min.js
+      - fontawesome.js
