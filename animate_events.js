@@ -19,7 +19,45 @@ function animate_events(events, places, options) {
 	var formatCurrentTime = d3.timeFormat("%d %b %y %H:%M:%S");
 	var inactive_event_types = [];
 
-    var handle_collisions = function () {
+	var add_css = function () {
+		var style = document.createElement('style');
+		style.textContent = 
+"button {" +
+"	font-size: 1.2em;" +
+"	border-radius: 6px;" +
+"	cursor: pointer;" +
+"}" +
+".event-replay-button, .event-number-input {" +
+"	font-family: Segoe UI,Arial,sans-serif;" +
+"	font-weight: bold;	" +
+"	font-size: 1em;" +
+"}" +
+"p {" +
+"	font-family: Segoe UI,Arial,sans-serif;" +
+"	font-size: 1.1em;" +
+"}" +
+".event circle {" +
+"    stroke-width: 1.5px;" +
+"}" +
+".event-legend {" +
+"	display: inline-block;" +
+"	vertical-align: top;" +
+"}" +
+".event-legend-description {" +
+"	padding-right: 16px;" +
+"}" +
+".event-key-inactive {" +
+"	opacity: .1;" +
+"	cursor: pointer;" +
+"}" +
+".event-key-active {" +
+"	opacity: 1;" +
+"	cursor: pointer;" +
+"}";
+    document.head.appendChild(style);
+	};
+
+   var handle_collisions = function () {
 	  	  var now = 0;
 		  var end_time = new Date(earliest_day.getTime()+(now*period*1000));
 		  var events_from_this_period = [];
@@ -287,14 +325,14 @@ function animate_events(events, places, options) {
   	  document.body.appendChild(period_input);
   	  document.body.appendChild(previous_period);
   	  update_faster_title();
-  	  update_slower_title();
-  	  
+  	  update_slower_title();	  
   };
 
   var svg_element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
   var nodes, svg, earliest_time, latest_time, earliest_day, time_display;
 
+    add_css();
     add_time_display();  
     document.body.appendChild(svg_element);
     add_play_buttons();
