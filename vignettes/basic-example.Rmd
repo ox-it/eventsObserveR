@@ -74,3 +74,36 @@ eventsObserveR(events = events,
               height = 600)
 ```
 
+# Shiny
+
+```{r}
+library(shiny)
+shinyApp(
+  ui = fluidPage(
+    sidebarLayout(
+      sidebarPanel(
+        sliderInput("n","n",min = 1000, max = 5000, value = 2000 )
+      ),
+    mainPanel(
+    eventsObserverOutput("events")
+    ))
+  ),
+  server = function(input, output){
+    output$events <- renderEventsObserver({
+      print(input$n)
+      eventsObserveR(events = events,
+              places = places,
+              period = input$n,
+              width = 600,
+              height = 600)
+    }
+    )
+  }
+)
+```
+
+
+
+
+
+
