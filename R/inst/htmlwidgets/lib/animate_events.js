@@ -1,29 +1,15 @@
 // Developed by Ken Kahn and Martin Hadley of IT Services, University of Oxford
-// copyright??
 
 <!-- very loosely based upon https://bl.ocks.org/mbostock/4062045 -->
 
-function create_event_animator(element) {
-	var widget;
-	return {initialise: function (events, places, options) {
-							widget = animate_events(events, places, options, element);
-	                    },
-	        refresh: function () {
-	        	         widget.refresh();
-	                 }
-	       };
-};
+function animate_events(events, places, options) {
 
-function animate_events(events, places, options, element) {
 	if (!options) {
 		options = {};
 	}
-	if (!element) {
-		element = document.body;
-	}
 	var width                    = options.width                    || 1100;
 	var height                   = options.height                   ||  600;
-	var periods_per_second       = options.periods_per_second       ||   24;
+	var periods_per_second       = options.periods_per_second       ||  100;
 	var period                   = options.period                   || 24*60*60; // in seconds
 	var previous_period_duration = options.previous_period_duration === undefined ? period : options.previous_period_duration;
 
@@ -71,7 +57,7 @@ function animate_events(events, places, options, element) {
     document.head.appendChild(style);
 	};
 
-   var refresh = function () {
+   var handle_collisions = function () {
 	  	  var now = 0;
 		  var end_time = new Date(earliest_day.getTime()+(now*period*1000));
 		  var events_from_this_period = [];
@@ -193,7 +179,7 @@ function animate_events(events, places, options, element) {
 
   var add_time_display = function () {
   	  time_display = document.createElement('p');
-  	  element.appendChild(time_display);
+  	  document.body.appendChild(time_display);
   };
 
   var add_play_buttons = function () {
@@ -282,7 +268,7 @@ function animate_events(events, places, options, element) {
 	  	  	                       	   	   inactive_event_types.push(entry.color);
 	  	  	                       	   	   key.className = "event-key-inactive";
 	  	  	                       	   }
-	  	  	                       	   refresh();
+	  	  	                       	   handle_collisions();
 	  	  	                       	   update();
 	  	  	                       });
 	  	  	  key.title = "Click to toggle whether this is included or not.";
@@ -317,27 +303,27 @@ function animate_events(events, places, options, element) {
 	  slower.addEventListener('click', slower_action);
 	  period_input.addEventListener('change', function (event) {
 	  	  period                   = +event.srcElement.value;
-	  	  refresh();
+	  	  handle_collisions();
 	  });
 	  previous_period.addEventListener('change', function (event) {
 	  	  previous_period_duration = +event.srcElement.value;
 	  });
 	  if (options.legend) {
   	  	  // move to next to svg later...
-  	  	  element.appendChild(create_legend(2));
+  	  	  document.body.appendChild(create_legend(2));
   	  }	  
-	  element.appendChild(br);
-	  element.appendChild(backward);
-  	  element.appendChild(step_backward);
-  	  element.appendChild(pause);
-  	  element.appendChild(step_forward);
-  	  element.appendChild(forward);
-  	  element.appendChild(space);
-  	  element.appendChild(faster);
-  	  element.appendChild(slower);
-  	  element.appendChild(space2);
-  	  element.appendChild(period_input);
-  	  element.appendChild(previous_period);
+	  document.body.appendChild(br);
+	  document.body.appendChild(backward);
+  	  document.body.appendChild(step_backward);
+  	  document.body.appendChild(pause);
+  	  document.body.appendChild(step_forward);
+  	  document.body.appendChild(forward);
+  	  document.body.appendChild(space);
+  	  document.body.appendChild(faster);
+  	  document.body.appendChild(slower);
+  	  document.body.appendChild(space2);
+  	  document.body.appendChild(period_input);
+  	  document.body.appendChild(previous_period);
   	  update_faster_title();
   	  update_slower_title();	  
   };
@@ -348,7 +334,7 @@ function animate_events(events, places, options, element) {
 
     add_css();
     add_time_display();  
-    element.appendChild(svg_element);
+    document.body.appendChild(svg_element);
     add_play_buttons();
 
 	svg = d3.select("svg")
@@ -381,7 +367,7 @@ function animate_events(events, places, options, element) {
 	       	        return 0;
 	       });
 
-	  refresh();
+	  handle_collisions();
     	            
     // add nodes for each event
     nodes = svg
@@ -432,18 +418,13 @@ function animate_events(events, places, options, element) {
     });
 
     update();
-
-    return {refresh: refresh,
-            resize:  function (width, height) {
-            	        console.error("Resize not yet implemented.");
-            }};
     
 };
 
 // the following was extremely slow and pushed circles too far apart
 //   var events_index = 0;
 
-//   var refresh = function (now) {
+//   var handle_collisions = function (now) {
 //   	  var end_time = new Date(earliest_time.getTime()+(now*period*1000));
 //   	  var events_from_this_period = [];
 //   	  events.some(function (event, index) {
@@ -463,7 +444,7 @@ function animate_events(events, places, options, element) {
 //   	  	  return;
 //   	  }
 //   	  if (events_from_this_period.length < 2) {
-//   	  	  refresh(now+1);
+//   	  	  handle_collisions(now+1);
 //   	  	  return;
 //   	  }
 //   	  console.log(events_from_this_period.length)
@@ -479,11 +460,11 @@ function animate_events(events, places, options, element) {
 // 					})
 // 		.on("end", function () {
 // 					   if (events_index < events.length-1) {
-// 						   refresh(now+1);
+// 						   handle_collisions(now+1);
 // 					   } else {
 // 					   	   tick();
 // 					   }
 // 			});
 //     };
 
-//     refresh(0);
+//     handle_collisions(0);

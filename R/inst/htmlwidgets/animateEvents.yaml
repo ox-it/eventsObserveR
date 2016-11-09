@@ -1,0 +1,6 @@
+dependencies:
+  - name: animateEvents
+    version: 1.0.0
+    src: htmlwidgets/lib
+    script: 
+      - animate_events.js
