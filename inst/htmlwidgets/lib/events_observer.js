@@ -31,6 +31,7 @@ function animate_events(events, places, options, element) {
 	var interface_height         = options.height                        ||  786; 		
 	var periods_per_second       = options.periods_per_second            ||   24;
 	var period                   = options.period                        || 24*60*60; // in seconds
+	var legend_columns           = options.legend_columns                ||    2;
 	var previous_period_duration = options.previous_period_duration === undefined ? period : options.previous_period_duration;
 
 	var paused            = true;
@@ -330,7 +331,7 @@ function animate_events(events, places, options, element) {
 	  });
 	  if (options.legend) {
   	  	  // move to next to svg later...
-  	  	  entire_interface.appendChild(create_legend(2));
+  	  	  entire_interface.appendChild(create_legend(legend_columns));
   	  }	  
 	  entire_interface.appendChild(br);
 	  entire_interface.appendChild(backward);

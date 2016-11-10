@@ -48,13 +48,13 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	       return {place_id:      station_id,
 				   event_type_id: species_id,
 				   time:          time,
-				   radius:        5*Math.sqrt(row["Number of Individuals"]),
-				   title:         row["Number of Individuals"] + " " + row["Species"] + " by " + row["Camera ID"] + " at " + formatTime(time) +
-									  describe("Number of males") +
-									  describe("Number of females") +
-									  describe("Number of unknown") +
-									  describe("Number of SA") +
-									  describe("Number of juv")};
+				   radius:        5*Math.sqrt(row["No. Individuals"]),
+				   title:         row["No. Individuals"] + " " + row["Species"] + " by " + row["Camera ID"] + " at " + formatTime(time) +
+									  describe("No. males") +
+									  describe("No. females") +
+									  describe("No. unknown") +
+									  describe("No. SA") +
+									  describe("No. juv")};
        },
 	   function(error, data) {
 	   	   var animal_observations = [];
@@ -80,7 +80,7 @@ d3.csv("../../WildCRUData/WildCRU.csv",
                return {x:      (width /2-horizontal_margin) * Math.cos(index * theta + rotation)+width/2, 
                        y:      (height/2-vertical_margin)   * Math.sin(index * theta + rotation)+height/2,
                        radius: Math.min(width, height)/60,
-		               color:  'lightpink',
+		               color:  'lavenderblush',
 		               id:     index,
 		               title:  station};
 	       });
@@ -100,7 +100,8 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	                                                               period:                     24*60*60,
 	                                                               previous_period_duration:   24*60*60,
 	                                                               periods_per_second:         24,
-	                                                               legend:                   legend});
+	                                                               legend:                   legend,
+	                                                               legend_columns:              2});
 	   });
 
 }());
