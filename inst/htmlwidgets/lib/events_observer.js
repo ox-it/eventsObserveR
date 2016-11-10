@@ -350,6 +350,7 @@ function animate_events(events, places, options, element) {
   	  observer.observe(element, {childList: true});
   	  element.appendChild(entire_interface);
   };
+  // need to wait until interface is added to element before discovering its dimensions to scale it to fit the specified dimensions
   var observer = new MutationObserver(function (mutations) {
                                           mutations.some(function(mutation) {
                                                              var i;
@@ -453,7 +454,11 @@ function animate_events(events, places, options, element) {
                          })
            .attr("cy",   function (d) {
           	                 return d.y;
-                         });
+                         })
+           .append("title")
+			  .text(function (d) { 
+						return d.title; 
+					});
 
     svg.selectAll("circle").sort(function (a, b) { 
         if (a.place_id !== undefined) return 1;  // only events have place_ids so send it to front so title tooltip works

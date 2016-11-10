@@ -77,11 +77,12 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	       	   var rotation = -Math.PI / 2; // so the first camera is at 12 o'clock
 	       	   var horizontal_margin = 200;
 	       	   var vertical_margin   = 100;
-               return {x: (width /2-horizontal_margin) * Math.cos(index * theta + rotation)+width/2, 
-                       y: (height/2-vertical_margin)   * Math.sin(index * theta + rotation)+height/2,
+               return {x:      (width /2-horizontal_margin) * Math.cos(index * theta + rotation)+width/2, 
+                       y:      (height/2-vertical_margin)   * Math.sin(index * theta + rotation)+height/2,
                        radius: Math.min(width, height)/60,
-		               color:  'rgba(0, 0, 0, .05)',
-		               id: index};
+		               color:  'lightpink',
+		               id:     index,
+		               title:  station};
 	       });
 	       animal_observations.forEach(function (d) {
 	       	   d.x = station_positions[d.place_id].x;
