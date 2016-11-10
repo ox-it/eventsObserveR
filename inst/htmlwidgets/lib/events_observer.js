@@ -6,11 +6,14 @@
 function create_event_animator(element) {
 	var widget;
 	return {initialise: function (events, places, options) {
-	            element.innerHTML = "";
+	                        element.innerHTML = "";
 							widget = animate_events(events, places, options, element);
 	                    },
 	        refresh: function () {
 	        	         widget.refresh();
+	                 },
+	        resize:  function (new_width, new_height) {
+						 scale_to_fit(new_width, new_height);
 	                 }
 	       };
 };
@@ -22,10 +25,12 @@ function animate_events(events, places, options, element) {
 	if (!element) {
 		element = document.body;
 	}
-	var width                    = options.width                    || 1100;
-	var height                   = options.height                   ||  600;
-	var periods_per_second       = options.periods_per_second       ||   24;
-	var period                   = options.period                   || 24*60*60; // in seconds
+	var view_width               = options.view_width                    ||  700;
+	var view_height              = options.view_height                   ||  500;
+	var interface_width          = options.width                         || 1024;
+	var interface_height         = options.height                        ||  786; 		
+	var periods_per_second       = options.periods_per_second            ||   24;
+	var period                   = options.period                        || 24*60*60; // in seconds
 	var previous_period_duration = options.previous_period_duration === undefined ? period : options.previous_period_duration;
 
 	var paused            = true;
@@ -69,8 +74,8 @@ function animate_events(events, places, options, element) {
 "	opacity: 1;" +
 "	cursor: pointer;" +
 "}";
-    document.head.appendChild(style);
-	};
+       document.head.appendChild(style);
+   };
 
    var refresh = function () {
 	  	  var now = 0;
@@ -194,7 +199,7 @@ function animate_events(events, places, options, element) {
 
   var add_time_display = function () {
   	  time_display = document.createElement('p');
-  	  element.appendChild(time_display);
+  	  entire_interface.appendChild(time_display);
   };
 
   var add_play_buttons = function () {
@@ -325,23 +330,45 @@ function animate_events(events, places, options, element) {
 	  });
 	  if (options.legend) {
   	  	  // move to next to svg later...
-  	  	  element.appendChild(create_legend(2));
+  	  	  entire_interface.appendChild(create_legend(2));
   	  }	  
-	  element.appendChild(br);
-	  element.appendChild(backward);
-  	  element.appendChild(step_backward);
-  	  element.appendChild(pause);
-  	  element.appendChild(step_forward);
-  	  element.appendChild(forward);
-  	  element.appendChild(space);
-  	  element.appendChild(faster);
-  	  element.appendChild(slower);
-  	  element.appendChild(space2);
-  	  element.appendChild(period_input);
-  	  element.appendChild(previous_period);
+	  entire_interface.appendChild(br);
+	  entire_interface.appendChild(backward);
+  	  entire_interface.appendChild(step_backward);
+  	  entire_interface.appendChild(pause);
+  	  entire_interface.appendChild(step_forward);
+  	  entire_interface.appendChild(forward);
+  	  entire_interface.appendChild(space);
+  	  entire_interface.appendChild(faster);
+  	  entire_interface.appendChild(slower);
+  	  entire_interface.appendChild(space2);
+  	  entire_interface.appendChild(period_input);
+  	  entire_interface.appendChild(previous_period);
   	  update_faster_title();
-  	  update_slower_title();	  
+  	  update_slower_title();
+  	  // listen for interface to be added to element
+  	  observer.observe(element, {childList: true});
+  	  element.appendChild(entire_interface);
   };
+  var observer = new MutationObserver(function (mutations) {
+                                          mutations.some(function(mutation) {
+                                                             var i;
+                                                             // mutation.addedNodes is a NodeList so can't use forEach
+                                                             for (i = 0; i < mutation.addedNodes.length; i++) {
+                                                                  if (mutation.addedNodes.item(i) === entire_interface) {
+                                                                  	  scale_to_fit(interface_width, interface_height);
+                                                                  	  return true;
+                                                                  }
+                                                             }
+                                                         });
+                                      });
+  
+  var scale_to_fit = function (interface_width, interface_height) {
+                         var scale = Math.min(interface_width  / entire_interface.clientWidth, interface_height / entire_interface.clientHeight);
+                         entire_interface.style.transform = "scale("+ scale + "," + scale + ")";
+  };
+
+  var entire_interface = document.createElement('div');
 
   var svg_element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
@@ -349,12 +376,12 @@ function animate_events(events, places, options, element) {
 
     add_css();
     add_time_display();  
-    element.appendChild(svg_element);
+    entire_interface.appendChild(svg_element);
     add_play_buttons();
 
 	svg = d3.select("svg")
-				  .attr("width",  width)
-				  .attr("height", height);
+				  .attr("width",  view_width)
+				  .attr("height", view_height);
 
 	events.forEach(function (event) {
 		   if (!earliest_time || event.time < earliest_time) {
@@ -410,22 +437,23 @@ function animate_events(events, places, options, element) {
 					return d.title; 
 				});
 
+	// if places don't have x,y coordinates then place them in a circle?
 	// add places
     nodes.select("g")
        .data(places)
        .enter().append("circle")
-           .attr("r", function (d) {
-      	                  return d.radius;
-                  })
+           .attr("r",    function (d) {
+      	                     return d.radius;
+                         })
            .attr("fill", function (d) {
-      	                  return d.color;
-                  })
-           .attr("cx", function (d) {
-          	              return d.x;
-                 })
-           .attr("cy", function (d) {
-          	              return d.y;
-                 });
+      	                     return d.color;
+                         })
+           .attr("cx",   function (d) {
+          	                 return d.x;
+                         })
+           .attr("cy",   function (d) {
+          	                 return d.y;
+                         });
 
     svg.selectAll("circle").sort(function (a, b) { 
         if (a.place_id !== undefined) return 1;  // only events have place_ids so send it to front so title tooltip works
@@ -436,55 +464,7 @@ function animate_events(events, places, options, element) {
 
     return {refresh: refresh,
             resize:  function (width, height) {
-            	        console.error("Resize not yet implemented.");
-            }};
-    
+            	         scale_to_fit(width, height);
+                     }
+           };
 };
-
-// the following was extremely slow and pushed circles too far apart
-//   var events_index = 0;
-
-//   var refresh = function (now) {
-//   	  var end_time = new Date(earliest_time.getTime()+(now*period*1000));
-//   	  var events_from_this_period = [];
-//   	  events.some(function (event, index) {
-//   	  	  if (index < events_index) {
-//   	  	  	  // already processed
-//   	  	  } else if (event.time <= end_time) {
-// //   	  	  	  event.vx = 2.5;
-// //   	  	  	  event.vy = 2.5;
-//   	  	  	  events_from_this_period.push(event);
-//   	  	  } else {
-//   	  	      events_index = index;
-//   	  	  	  return true;
-//   	  	  }
-//   	  });
-//   	  if (events_index === events.length-1) {
-//   	  	  tick();
-//   	  	  return;
-//   	  }
-//   	  if (events_from_this_period.length < 2) {
-//   	  	  refresh(now+1);
-//   	  	  return;
-//   	  }
-//   	  console.log(events_from_this_period.length)
-//       d3.forceSimulation(events_from_this_period)
-// 		// based on http://bl.ocks.org/mbostock/31ce330646fa8bcb7289ff3b97aab3f5
-// 		.velocityDecay(0.2)
-// 		.force("x", d3.forceX().strength(0.002))
-// 		.force("y", d3.forceY().strength(0.002))
-// 		.force("collide", d3.forceCollide().radius(function(d) { 
-// 														return d.radius + 0.5; 
-// 												   }).iterations(2))
-// 		.on("tick", function (d) {
-// 					})
-// 		.on("end", function () {
-// 					   if (events_index < events.length-1) {
-// 						   refresh(now+1);
-// 					   } else {
-// 					   	   tick();
-// 					   }
-// 			});
-//     };
-
-//     refresh(0);

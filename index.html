@@ -92,12 +92,14 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	       												return {color: color(id/max_event_type_id),
 	       												        description: species[id]};
 	       });
-	       animate_events(animal_observations, station_positions, {width:  width, 
-	                                                               height: height,
-	                                                               period:                   24*60*60,
-	                                                               previous_period_duration: 24*60*60,
-	                                                               periods_per_second: 24,
-	                                                               legend: legend});
+	       animate_events(animal_observations, station_positions, {view_width:               width, 
+	                                                               view_height:              height,
+	                                                               width:                    1200,
+	                                                               height:                    900,
+	                                                               period:                     24*60*60,
+	                                                               previous_period_duration:   24*60*60,
+	                                                               periods_per_second:         24,
+	                                                               legend:                   legend});
 	   });
 
 }());
