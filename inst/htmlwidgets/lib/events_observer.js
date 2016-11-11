@@ -52,13 +52,17 @@ function animate_events(events, options, element) {
 		var places = place_names.map(function (place_name, index) {
 	       var theta = 2 * Math.PI / place_names.length;
 	       var rotation = -Math.PI / 2; // so the first place is at 12 o'clock
-	       // provide options for specifying the following
-	       var horizontal_margin = 200;
-	       var vertical_margin   = 100;
-           return {x:      (view_width /2-horizontal_margin) * Math.cos(index * theta + rotation)+view_width/2, 
-                   y:      (view_height/2-vertical_margin)   * Math.sin(index * theta + rotation)+view_height/2,
-                   radius: Math.min(view_width, view_height)/60,
-		           color:  'lavenderblush',
+	       var horizontal_margin  = options.horizontal_margin || 100;
+	       var vertical_margin    = options.vertical_margin   || 100;
+	       var place_color        = options.place_color       || 'lavenderblush';
+	       var ellipse_width      = view_width /2-horizontal_margin;
+	       var ellipse_height     = (view_height/2-vertical_margin);
+	       var ellipse_circumference = 2 * Math.PI * Math.sqrt((ellipse_width * ellipse_width + ellipse_height * ellipse_height) / 2);
+	       var radius            = options.radius || ellipse_circumference / (2 * place_names.length);
+           return {x:      ellipse_width  * Math.cos(index * theta + rotation) + view_width/2, 
+                   y:      ellipse_height * Math.sin(index * theta + rotation) + view_height/2,
+                   radius: radius,
+		           color:  place_color,
 		           id:     index,
 		           title:  place_name};
 	       });
@@ -408,6 +412,7 @@ function animate_events(events, options, element) {
   var scale_to_fit = function (interface_width, interface_height) {
                          var scale = Math.min(interface_width  / entire_interface.clientWidth, interface_height / entire_interface.clientHeight);
                          entire_interface.style.transform = "scale("+ scale + "," + scale + ")";
+                         entire_interface.style["transform-origin"] = "0 0";
   };
 
   var entire_interface = document.createElement('div');
@@ -441,7 +446,6 @@ function animate_events(events, options, element) {
 		   if (!latest_time || event.time > latest_time) {
 			   latest_time = event.time;
 		   }
-		   // TODO: if no x and y compupte from places
 		   event.original_x = event.x;
 		   event.original_y = event.y;
 	});
