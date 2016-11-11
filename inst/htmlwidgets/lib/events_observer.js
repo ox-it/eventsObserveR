@@ -97,14 +97,15 @@ function animate_events(events, options, element) {
 "	font-weight: bold;	" +
 "	font-size: 1em;" +
 "}" +
-"p {" +
+".event-text {" +
 "	font-family: Segoe UI,Arial,sans-serif;" +
 "	font-size: 1.1em;" +
+"	font-weight: bold;	" +
 "}" +
 ".event circle {" +
 "    stroke-width: 1.5px;" +
 "}" +
-".event-legend {" +
+".event-legend, .event-view-and-controls {" +
 "	display: inline-block;" +
 "	vertical-align: top;" +
 "}" +
@@ -242,9 +243,14 @@ function animate_events(events, options, element) {
       }
   };
 
-  var add_time_display = function () {
-  	  time_display = document.createElement('p');
-  	  entire_interface.appendChild(time_display);
+  var view_and_controls = document.createElement('table');
+
+  var add_to_view_and_controls = function (element) {
+	  var row   = document.createElement('tr');
+	  var entry = document.createElement('td');
+	  entry.appendChild(element);
+	  row.appendChild(entry);
+	  view_and_controls.appendChild(row);
   };
 
   var add_play_buttons = function () {
@@ -344,6 +350,10 @@ function animate_events(events, options, element) {
 	  	  });
 	  	  return table;
 	  };
+	  var video_player      = document.createElement('div');
+	  var periods_interface = document.createElement('div');
+	  entire_interface.appendChild(view_and_controls);
+	  view_and_controls.className = 'event-view-and-controls';
 	  forward.innerHTML         = '<i class="fa fa-play" aria-hidden="true">';
 	  backward.innerHTML        = '<i class="fa fa-backward" aria-hidden="true">';
   	  pause.innerHTML           = '<i class="fa fa-pause" aria-hidden="true">';
@@ -367,28 +377,31 @@ function animate_events(events, options, element) {
 	  faster.addEventListener('click', faster_action);
 	  slower.addEventListener('click', slower_action);
 	  period_input.addEventListener('change', function (event) {
-	  	  period                   = +event.srcElement.value;
+	  	  period = +event.srcElement.value;
 	  	  refresh();
 	  });
 	  previous_period.addEventListener('change', function (event) {
 	  	  previous_period_duration = +event.srcElement.value;
+	  	  refresh();
 	  });
 	  if (options.legend) {
-  	  	  // move to next to svg later...
   	  	  entire_interface.appendChild(create_legend(legend_columns));
-  	  }	  
-	  entire_interface.appendChild(br);
-	  entire_interface.appendChild(backward);
-  	  entire_interface.appendChild(step_backward);
-  	  entire_interface.appendChild(pause);
-  	  entire_interface.appendChild(step_forward);
-  	  entire_interface.appendChild(forward);
-  	  entire_interface.appendChild(space);
-  	  entire_interface.appendChild(faster);
-  	  entire_interface.appendChild(slower);
-  	  entire_interface.appendChild(space2);
-  	  entire_interface.appendChild(period_input);
-  	  entire_interface.appendChild(previous_period);
+  	  } 
+	  video_player.appendChild(backward);
+  	  video_player.appendChild(step_backward);
+  	  video_player.appendChild(pause);
+  	  video_player.appendChild(step_forward);
+  	  video_player.appendChild(forward);
+  	  video_player.appendChild(space);
+  	  video_player.appendChild(faster);
+  	  video_player.appendChild(slower);
+      video_player.appendChild(space2);
+  	  video_player.appendChild(time_display);
+  	  time_display.className = "event-text";
+  	  add_to_view_and_controls(video_player);
+  	  periods_interface.appendChild(period_input);
+  	  periods_interface.appendChild(previous_period);
+  	  add_to_view_and_controls(periods_interface);
   	  update_faster_title();
   	  update_slower_title();
   	  // listen for interface to be added to element
@@ -417,9 +430,11 @@ function animate_events(events, options, element) {
 
   var entire_interface = document.createElement('div');
 
-  var svg_element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  var time_display     = document.createElement('span');
 
-  var nodes, svg, earliest_time, latest_time, earliest_day, time_display;
+  var svg_element      = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+  var nodes, svg, earliest_time, latest_time, earliest_day;
 
 	if (!places) {
 		if (options.place_key) {
@@ -431,8 +446,7 @@ function animate_events(events, options, element) {
 	}
 	coordinates_from_place();
     add_css();
-    add_time_display();  
-    entire_interface.appendChild(svg_element);
+    add_to_view_and_controls(svg_element);
     add_play_buttons();
 
 	svg = d3.select("svg")
