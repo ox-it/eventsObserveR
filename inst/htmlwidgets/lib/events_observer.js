@@ -5,9 +5,9 @@
 
 function create_event_animator(element) {
 	var widget;
-	return {initialise: function (events, places, options) {
+	return {initialise: function (events, options) {
 	                        element.innerHTML = "";
-							widget = animate_events(events, places, options, element);
+							widget = animate_events(events, options, element);
 	                    },
 	        refresh: function () {
 	        	         widget.refresh();
@@ -18,13 +18,14 @@ function create_event_animator(element) {
 	       };
 };
 
-function animate_events(events, places, options, element) {
+function animate_events(events, options, element) {
 	if (!options) {
 		options = {};
 	}
 	if (!element) {
 		element = document.body;
 	}
+	var places                   = options.places; // can be undefined so long as options.place_key is defined
 	var view_width               = options.view_width                    ||  700;
 	var view_height              = options.view_height                   ||  500;
 	var interface_width          = options.width                         || 1024;
@@ -39,6 +40,45 @@ function animate_events(events, places, options, element) {
 	var formatDate        = d3.timeFormat("%d %b %Y");
 	var formatCurrentTime = d3.timeFormat("%d %b %y %H:%M:%S");
 	var inactive_event_types = [];
+
+	var compute_places = function () {
+		var place_names = [];
+		var place_key = options.place_key || "place";
+		events.forEach(function (event) {
+			if (event[place_key] && place_names.indexOf(event[place_key]) < 0) {
+				place_names.push(event[place_key]);
+			}	
+		});
+		var places = place_names.map(function (place_name, index) {
+	       var theta = 2 * Math.PI / place_names.length;
+	       var rotation = -Math.PI / 2; // so the first place is at 12 o'clock
+	       // provide options for specifying the following
+	       var horizontal_margin = 200;
+	       var vertical_margin   = 100;
+           return {x:      (view_width /2-horizontal_margin) * Math.cos(index * theta + rotation)+view_width/2, 
+                   y:      (view_height/2-vertical_margin)   * Math.sin(index * theta + rotation)+view_height/2,
+                   radius: Math.min(view_width, view_height)/60,
+		           color:  'lavenderblush',
+		           id:     index,
+		           title:  place_name};
+	       });
+	    events.forEach(function (event) {
+			event.place_id = place_names.indexOf(event[place_key]);
+	    });
+	    return places;
+	};
+
+	var coordinates_from_place = function () {
+		events.forEach(function (event) {
+			var place = places[event.place_id];
+			if (event.x === undefined) {
+				event.x = place.x;
+			}
+			if (event.y === undefined) {
+				event.y = place.y;
+			}
+		});
+	};
 
 	var add_css = function () {
 		var style = document.createElement('style');
@@ -299,7 +339,7 @@ function animate_events(events, places, options, element) {
 	  	  	  row.appendChild(description);
 	  	  });
 	  	  return table;
-	  }
+	  };
 	  forward.innerHTML         = '<i class="fa fa-play" aria-hidden="true">';
 	  backward.innerHTML        = '<i class="fa fa-backward" aria-hidden="true">';
   	  pause.innerHTML           = '<i class="fa fa-pause" aria-hidden="true">';
@@ -376,6 +416,15 @@ function animate_events(events, places, options, element) {
 
   var nodes, svg, earliest_time, latest_time, earliest_day, time_display;
 
+	if (!places) {
+		if (options.place_key) {
+			// places should be generated from values of place_key of events
+			places = compute_places();
+		} else {
+			// report error
+		}
+	}
+	coordinates_from_place();
     add_css();
     add_time_display();  
     entire_interface.appendChild(svg_element);
@@ -392,6 +441,7 @@ function animate_events(events, places, options, element) {
 		   if (!latest_time || event.time > latest_time) {
 			   latest_time = event.time;
 		   }
+		   // TODO: if no x and y compupte from places
 		   event.original_x = event.x;
 		   event.original_y = event.y;
 	});
