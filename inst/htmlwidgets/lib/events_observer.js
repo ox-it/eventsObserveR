@@ -4,6 +4,7 @@
 <!-- very loosely based upon https://bl.ocks.org/mbostock/4062045 -->
 
 function create_event_animator(element) {
+	// interface for HTMLWidgets in R
 	var widget;
 	return {initialise: function (events, options) {
 	                        element.innerHTML = "";
@@ -13,12 +14,20 @@ function create_event_animator(element) {
 	        	         widget.refresh();
 	                 },
 	        resize:  function (new_width, new_height) {
-						 scale_to_fit(new_width, new_height);
+						 widget.resize(new_width, new_height);
 	                 }
 	       };
 };
 
 function animate_events(events, options, element) {
+	// events should be an array of objects with 
+	//   event_type_id (a number between 0 and one less than the number of unique event types),
+	//   time (a JavaScript Date object),
+	// and optionally
+	//   radius, color, title, and any other fields
+	// options include:
+	//   places (an array of objects with ... )
+	//   place_key (a string corresponding to a field in the events -- )
 	if (!options) {
 		options = {};
 	}
@@ -489,10 +498,10 @@ function animate_events(events, options, element) {
 		.data(events)
 		.enter().append("circle")
 		.attr("r",    function (d) {
-						  return d.radius;
+						  return d.radius || options.event_radius || 5;
 					  })
 		.attr("fill", function (d) {
-						  return d.color;
+						  return d.color || options.event_color || 'red';
 					  })
 		.attr("cx", function (d) {
 						return d.x;
