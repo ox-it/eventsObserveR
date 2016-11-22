@@ -172,7 +172,7 @@ function animate_events(events, options, element) {
 		  	  var circumference = 0;		  	  
 		  	  var radius = 0;
 		  	  var arc_length = 0;
-		  	  var event_radius = event.radius || options.event_radius;
+		  	  var event_radius = event.radius || options.event_radius || 5;
 		  	  events_at_same_place.forEach(function (event) {
 		  	  	  circumference += event_radius*2;
 		  	  }); 	  
