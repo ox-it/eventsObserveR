@@ -18,19 +18,32 @@ function create_event_animator(element) {
 	                 },
 	        add_legend: function (legend, legend_columns) {
 	        	            widget.add_legend(legend, legend_columns);
-	        }
+	                    }
 	       };
 };
 
 function animate_events(events, options, element) {
 	// events should be an array of objects with 
 	//   event_type_id (a number between 0 and one less than the number of unique event types),
-	//   time (a JavaScript Date object),
+	//   time (a JavaScript Date object) or an integer corresponding to the number milliseconds since 1 January, 1970.
 	// and optionally
 	//   radius, color, title, and any other fields
 	// options include:
 	//   places (an array of objects with ... )
 	//   place_key (a string corresponding to a field in the events -- )
+	//   view_width and view_height which specify the size of the visualisation area in pixels
+	//   interface_width and interface_height which specify the size of the entire interface (including controls and legends) in pixels
+	//   period those events with this period are displayed (given in seconds)
+	//   previous_period_duration those events just prior to now that are displayed when paused (given in seconds)
+	//   periods_per_second the desired rate at which periods are displayed (periods ("frames") per second) -- browsers might not be capable of supporting high values (e.g. over 60)
+	//   horizontal_margin and vertical_margin space around the view of the places needed for displaying circles around places (in pixels)
+	//   place_color if places do not specify a color then this value is used
+	//   event_color if events do not specify a color then this value is used
+	//   place_radius radius of place circles
+	//   event_radius radius of events if not explicitly provided
+	//   legend an array of objects with color and description keys
+	//   legend_columns the number of columns to display the legend
+
 	if (!options) {
 		options = {};
 	}
@@ -75,7 +88,7 @@ function animate_events(events, options, element) {
 	       var ellipse_width      = view_width /2-horizontal_margin;
 	       var ellipse_height     = (view_height/2-vertical_margin);
 	       var ellipse_circumference = 2 * Math.PI * Math.sqrt((ellipse_width * ellipse_width + ellipse_height * ellipse_height) / 2);
-	       var radius            = options.radius || ellipse_circumference / (2 * place_names.length);
+	       var radius            = options.place_radius || ellipse_circumference / (2 * place_names.length);
            return {x:      ellipse_width  * Math.cos(index * theta + rotation) + view_width/2, 
                    y:      ellipse_height * Math.sin(index * theta + rotation) + view_height/2,
                    radius: radius,
@@ -159,16 +172,17 @@ function animate_events(events, options, element) {
 		  	  var circumference = 0;		  	  
 		  	  var radius = 0;
 		  	  var arc_length = 0;
+		  	  var event_radius = event.radius || options.event_radius;
 		  	  events_at_same_place.forEach(function (event) {
-		  	  	  circumference += event.radius*2;
+		  	  	  circumference += event_radius*2;
 		  	  }); 	  
 		  	  radius = circumference / (2 * Math.PI);
 		  	  events_at_same_place.forEach(function (event) { 
 		  	      // fraction of the circle to the center of the current circle
-		  	      var angle = (arc_length+event.radius) * 2 * Math.PI / circumference;
+		  	      var angle = (arc_length+event_radius) * 2 * Math.PI / circumference;
 		  	  	  event.x = event.original_x + radius * Math.cos(angle);
 		  	  	  event.y = event.original_y + radius * Math.sin(angle);
-		  	  	  arc_length += event.radius*2;  
+		  	  	  arc_length += event_radius*2;  
 		  	  });
 		  };
 	      events.forEach(function (event, index) {
@@ -522,7 +536,7 @@ function animate_events(events, options, element) {
 						  return d.radius || options.event_radius || 5;
 					  })
 		.attr("fill", function (d) {
-						  return d.color || options.event_color || 'red';
+						  return d.color  || options.event_color || 'red';
 					  })
 		.attr("cx", function (d) {
 						return d.x;
