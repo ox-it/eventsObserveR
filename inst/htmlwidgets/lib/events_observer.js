@@ -134,7 +134,7 @@ function animate_events(events, options, element) {
 
    var refresh = function () {
 	  	  var now = 0;
-		  var end_time = new Date(earliest_day.getTime()+(now*period*1000));
+		  var end_time = new Date(earliest_day+(now*period*1000));
 		  var events_from_this_period = [];
 		  var locations_to_events = [];
 		  var spreadout_events_with_the_same_location = function () {
@@ -176,7 +176,7 @@ function animate_events(events, options, element) {
 							  } else {
 								  spreadout_events_with_the_same_location();
 								  now++;
-								  end_time = new Date(earliest_day.getTime()+(now*period*1000));
+								  end_time = new Date(earliest_day+(now*period*1000));
 								  events_from_this_period = [];
 								  locations_to_events = [];
 							  }
@@ -186,11 +186,17 @@ function animate_events(events, options, element) {
   var now = 0;
 
   var current_period = function (time) {
+  	  if (time.getTime) {
+  	  	  time = time.getTime();
+  	  }
   	  return time-earliest_day >= 1000*(now*period) &&
       	     time-earliest_day <  1000*(now*period+period);
   };
 
   var previous_period = function (time) {
+  	  if (time.getTime) {
+  	  	  time = time.getTime();
+  	  }  	
   	  return paused &&
   	         time-earliest_day >= 1000*(now*period-previous_period_duration) &&
       	     time-earliest_day <  1000*(now*period);
@@ -198,7 +204,7 @@ function animate_events(events, options, element) {
 
   var update = function () {
   	  // move current_period's and previous_period's event sightings into view and move others out
-  	  var date = new Date(earliest_day.getTime()+1000*(now*period+period));
+  	  var date = new Date(earliest_day+1000*(now*period+period));
 	  // if integer number of days then just display the date otherwise the date and time
 	  d3.select(time_display).text(period >= 24*60*60 && period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
 	  nodes
@@ -244,7 +250,7 @@ function animate_events(events, options, element) {
 	  	  return;
 	  }
       now += play_direction;
-      if (earliest_time.getTime()+now*period*1000 <= latest_time.getTime() && now >= 0) {
+      if (earliest_time+now*period*1000 <= latest_time && now >= 0) {
     	  setTimeout(tick, 1000/periods_per_second);
       } else {
       	  // since got the end of the log
@@ -463,6 +469,9 @@ function animate_events(events, options, element) {
 				  .attr("height", view_height);
 
 	events.forEach(function (event) {
+		   if (event.time.getTime) {
+		   	   event.time = event.time.getTime();
+		   }
 		   if (!earliest_time || event.time < earliest_time) {
 			   earliest_time = event.time;		   	  
 		   }
@@ -477,6 +486,7 @@ function animate_events(events, options, element) {
 	earliest_day.setHours(0);
 	earliest_day.setMinutes(0);
 	earliest_day.setSeconds(0);
+	earliest_day = earliest_day.getTime(); // milliseconds since 1 January 1970
 
 	events.sort(function (a, b) {
 	       	        if (a.time < b.time) {
