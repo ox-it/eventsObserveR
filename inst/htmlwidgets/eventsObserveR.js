@@ -20,7 +20,6 @@ HTMLWidgets.widget({
        
 
         var settings = x.settings;
-        console.log()
 
         animateEventsWidget.initialise(events, settings);
 
@@ -28,7 +27,6 @@ HTMLWidgets.widget({
       },
       
       resize: function(width, height) {
-        console.log("inside of resize");
         // forward resize on to animateEvents renderers
 //        for (var name in animateEventsWidget.renderers)
 //          animateEventsWidget.renderers[name].resize(width, height);  
