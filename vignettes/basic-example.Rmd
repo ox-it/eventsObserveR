@@ -30,11 +30,19 @@ events <- data.frame(
   place_id = 0:4, 
   x = seq(100, 500, 100),
   y = seq(100, 500, 100),
-  event_type_id = 1:5,
+  event_type_id = 1:5
   time = 1e6 * 1:5,
   radius = 5,
   stringsAsFactors = F
 )
+
+
+legend.data <- data.frame(
+  color = ,
+  description = ,
+  species = c("lion", "giraffe")
+)
+
 ```
 
 Within the htmlwidget we convert this into JSON that D3 will like using `HTMLWidgets.dataframeToD3`
@@ -55,7 +63,7 @@ places = data.frame(
 # Make Emre's data good
 
 ```{r}
-emre_data <- read.csv("data-raw/FOQMRuVAifoTmfWMDgsz6a.csv", stringsAsFactors = F)
+emre_data <- read.csv("http://users.ox.ac.uk/~oucs0030/temp/FOQMRuVAifoTmfWMDgsz6a.csv", stringsAsFactors = F)
 ```
 
 ```{r}
@@ -67,12 +75,29 @@ emre_data %>%
 # Run Code
 
 ```{r}
+eventsObserveR(events = emre_data
+              # places = places,
+              # period = 1000
+              )
+```
+
+```{r}
 eventsObserveR(events = events,
               places = places,
               period = 1000,
               width = 600,
-              height = 600)
+              height = 600) %>%
+  eventsLegend(columns = 2)
+
+eventsObserveR(events = events,
+              places = places,
+              period = 1000,
+              width = 600,
+              height = 600) %>%
+  eventsLegend(legend.data = df,
+               columns -1 )
 ```
+
 
 # Shiny
 
