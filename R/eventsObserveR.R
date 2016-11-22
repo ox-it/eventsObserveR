@@ -36,7 +36,11 @@ eventsObserveR <- function(events,
   htmlwidgets::createWidget("eventsObserveR", 
                             x,
                             width = size$interface.width,
-                            height = size$interface.height)
+                            height = size$interface.height,
+                            sizingPolicy = htmlwidgets::sizingPolicy(
+                              browser.fill = TRUE,
+                              browser.padding = 75
+                            ))
   
 }
 
