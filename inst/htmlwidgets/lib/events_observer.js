@@ -15,7 +15,10 @@ function create_event_animator(element) {
 	                 },
 	        resize:  function (new_width, new_height) {
 						 widget.resize(new_width, new_height);
-	                 }
+	                 },
+	        add_legend: function (legend, legend_columns) {
+	        	            widget.add_legend(legend, legend_columns);
+	        }
 	       };
 };
 
@@ -53,12 +56,17 @@ function animate_events(events, options, element) {
 	var compute_places = function () {
 		var place_names = [];
 		var place_key = options.place_key || "place";
+		var places;
 		events.forEach(function (event) {
 			if (event[place_key] && place_names.indexOf(event[place_key]) < 0) {
 				place_names.push(event[place_key]);
 			}	
 		});
-		var places = place_names.map(function (place_name, index) {
+		if (place_names.length === 0) {
+			alert("Error: either places or a place_key used in the events needs to be provided.");
+			return;
+		};
+		places = place_names.map(function (place_name, index) {
 	       var theta = 2 * Math.PI / place_names.length;
 	       var rotation = -Math.PI / 2; // so the first place is at 12 o'clock
 	       var horizontal_margin  = options.horizontal_margin || 100;
@@ -329,11 +337,14 @@ function animate_events(events, options, element) {
 	  var update_slower_title = function () {
 	  	  slower.title = "Speed is " + periods_per_second.toPrecision(4) + " periods per second. Click to go slower.";
 	  };
-	  var create_legend = function (columns) {
+	  var add_legend = function (legend_data, columns) {
+	  	  entire_interface.appendChild(create_legend(legend_data, columns));
+	  };
+	  var create_legend = function (legend_data, columns) {
 	  	  var table = document.createElement('table');
 	  	  var row;
 	  	  table.className = "event-legend";
-	  	  options.legend.forEach(function (entry, index) {
+	  	  legend_data.forEach(function (entry, index) {
 	  	  	  var key         = document.createElement('td');
 	  	  	  var description = document.createElement('td');
 	  	  	  if (index%columns === 0) {
@@ -400,7 +411,7 @@ function animate_events(events, options, element) {
 	  	  refresh();
 	  });
 	  if (options.legend) {
-  	  	  entire_interface.appendChild(create_legend(legend_columns));
+  	  	  add_legend(options.legend, legend_columns);
   	  } 
 	  video_player.appendChild(backward);
   	  video_player.appendChild(step_backward);
