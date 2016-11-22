@@ -16,11 +16,14 @@ HTMLWidgets.widget({
         var parser = new DOMParser();
         var events = HTMLWidgets.dataframeToD3(x.events);
         
-        var places = HTMLWidgets.dataframeToD3(x.places);
+       // var places = HTMLWidgets.dataframeToD3(x.places);
+       
 
         var settings = x.settings;
+        console.log()
 
-        animateEventsWidget.initialise(events, places, settings);
+        animateEventsWidget.initialise(events, settings);
+
         animateEventsWidget.refresh();
       },
       
