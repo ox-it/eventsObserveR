@@ -187,22 +187,22 @@ function animate_events(events, options, element) {
 		  	  });
 		  };
 	      events.forEach(function (event, index) {
-							  if (event.time < end_time) {
-							  	  if (inactive_event_types.indexOf(event.color) < 0) {
-									  events_from_this_period.push(event);
-									  if (locations_to_events[event.place_id]) {
+							 if (event.time < end_time) {
+							  	 if (inactive_event_types.indexOf(event.color) < 0) {
+								     events_from_this_period.push(event);
+									 if (locations_to_events[event.place_id]) {
 										  locations_to_events[event.place_id].push(event);
 									  } else {
 										  locations_to_events[event.place_id] = [event];
 									  }
-							  	  }
-							  } else {
-								  spreadout_events_with_the_same_location();
-								  now++;
-								  end_time = new Date(earliest_day+(now*period*1000));
-								  events_from_this_period = [];
-								  locations_to_events = [];
-							  }
+							  	 }
+							 } else {
+								 spreadout_events_with_the_same_location();
+								 now++;
+								 end_time = new Date(earliest_day+(now*period*1000));
+								 events_from_this_period = [];
+								 locations_to_events = [];
+							 }
 			            });
 	  };
 
@@ -273,6 +273,9 @@ function animate_events(events, options, element) {
 	  	  return;
 	  }
       now += play_direction;
+      if (now < 0) {
+      	  now = 0;
+      }
       if (earliest_time+now*period*1000 <= latest_time && now >= 0) {
     	  setTimeout(tick, 1000/periods_per_second);
       } else {
@@ -414,13 +417,15 @@ function animate_events(events, options, element) {
 	  var period_change = function (event) {
 	  	  var units_selector = document.getElementById("period-units");
 	  	  var period_input = document.getElementById("period-input");
+	  	  var now_in_seconds = now*period;
 	  	  period = (+period_input.value)*seconds_per_unit(units_selector.value);
+	  	  now = Math.floor(now_in_seconds/period);
 	  	  refresh();
 	  };
 	  var previous_period_change = function (event) {
 	  	  var units_selector = document.getElementById("previous-period-units");
 	  	  var period_input = document.getElementById("previous-period-input");
-	  	  previous_period_duration = (+previous_period_input.value)*seconds_per_unit(units_selector.value);
+	  	  previous_period_duration = (+period_input.value)*seconds_per_unit(units_selector.value);
 	  	  refresh();
 	  };
 	  entire_interface.appendChild(view_and_controls);
