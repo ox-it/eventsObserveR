@@ -7,23 +7,39 @@ eventsObserveR <- function(events,
                           period = 86400,
                           previousPeriodDuration = 86400,
                           size = list(
-                            view.width = 700,
-                            view.height = 500,
+                            view.width = 600,
+                            view.height = 600,
                             interface.width = 1024, 
-                            interface.height = 786
-                          )) {
+                            interface.height = 786,
+                            horizontal.margin = 100,
+                            vertical.margin = 100
+                          ),
+                          place.radius = NULL,
+                          event.radius = 5,
+                          place.color = "lavenderblush",
+                          event.color = "red",
+                          legend = NULL,
+                          legend.columns = 1) {
   
   # create a list that contains the settings
   settings <- list(
     periods_per_second = periodsPerSecond,
     period = period,
+    previous_period_duration = previousPeriodDuration,
     places = places,
     place_key = place.key,
     view_width = size$view.width,
     view_height = size$view.height,
     interface_width = size$interface.width,
     interface_height = size$interface.height,
-    previous_period_duration = previousPeriodDuration 
+    horizontal_margin = size$horizontal.margin,
+    vertical_margin = size$vertical.margin,
+    place_radius = place.radius,
+    event_radius = event.radius,
+    place_color = place.color,
+    event_color = event.color,
+    legend = legend,
+    legend_columns = legend.columns
   )
   
   # pass the data and settings using 'x'
@@ -36,11 +52,13 @@ eventsObserveR <- function(events,
   htmlwidgets::createWidget("eventsObserveR", 
                             x,
                             width = size$interface.width,
-                            height = size$interface.height,
-                            sizingPolicy = htmlwidgets::sizingPolicy(
-                              browser.fill = TRUE,
-                              browser.padding = 75
-                            ))
+                            height = size$interface.height
+                            # Using default htmlwidget sizingPolicy for time being
+                            # sizingPolicy = htmlwidgets::sizingPolicy(
+                            #   browser.fill = TRUE,
+                            #   browser.padding = 75
+                            # )
+                            )
   
 }
 
