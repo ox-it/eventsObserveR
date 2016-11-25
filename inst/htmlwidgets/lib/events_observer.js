@@ -126,6 +126,7 @@ function animate_events(events, options, element) {
 "	font-family: Segoe UI,Arial,sans-serif;" +
 "	font-weight: bold;	" +
 "	font-size: 1em;" +
+"   width: 8ch;" +
 "}" +
 ".event-text {" +
 "	font-family: Segoe UI,Arial,sans-serif;" +
@@ -392,6 +393,36 @@ function animate_events(events, options, element) {
 	  };
 	  var video_player      = document.createElement('div');
 	  var periods_interface = document.createElement('div');
+	  var unit_selector = function (id) {
+	  	  return '<select class="event-text" id="' + id + '">' + 
+  	             '<option name="seconds">seconds</option>' +
+  	             '<option name="minutes">minutes</option>' +
+  	             '<option name="hours">hours</option>' +
+  	             '<option name="days">days</option>' +
+  	             '<option name="days">weeks</option>' +
+  	             '</select>';
+	  };
+	  var seconds_per_unit = function (units) {
+	  	  switch (units) {
+	  	  	case "minutes": return 60;
+	  	  	case "hours":   return 60*60;
+	  	  	case "days":    return 60*60*24;
+	  	  	case "weeks":   return 60*60*24*7;
+	  	  	default: return 1;
+	  	  }
+	  };
+	  var period_change = function (event) {
+	  	  var units_selector = document.getElementById("period-units");
+	  	  var period_input = document.getElementById("period-input");
+	  	  period = (+period_input.value)*seconds_per_unit(units_selector.value);
+	  	  refresh();
+	  };
+	  var previous_period_change = function (event) {
+	  	  var units_selector = document.getElementById("previous-period-units");
+	  	  var period_input = document.getElementById("previous-period-input");
+	  	  previous_period_duration = (+previous_period_input.value)*seconds_per_unit(units_selector.value);
+	  	  refresh();
+	  };
 	  entire_interface.appendChild(view_and_controls);
 	  view_and_controls.className = 'event-view-and-controls';
 	  forward.innerHTML         = '<i class="fa fa-play" aria-hidden="true">';
@@ -404,11 +435,15 @@ function animate_events(events, options, element) {
   	  space.innerHTML           = '&nbsp;&nbsp;';
   	  space2.innerHTML          = '&nbsp;&nbsp;';
   	  period_input.innerHTML    = '<label class="event-number-input" title="View all events that occured within this period of time.">' + 
-  	                              'Period (in seconds): ' + 
-  	                              '<input class="event-number-input" type="number" value="' + period + '"></label>';
+  	                              'Period: ' + 
+  	                              '<input class="event-number-input" type="number" id="period-input" value="' + period + '">' +
+  	                               unit_selector("period-units") +
+  	                              '</label>';
   	  previous_period.innerHTML = '<label class="event-number-input" title="Display the previous events as hollow circles that occured within this many seconds before now. If 0 will not be displayed.">' +
-  	                              '&nbsp;Previous period: ' +
-  	                              '<input class="event-number-input" type="number" value="' + previous_period_duration + '"></label>';
+  	                              '&nbsp;&nbsp;Previous period: ' +
+  	                              '<input class="event-number-input" type="number" id="previous-period-input" value="' + previous_period_duration + '">' +
+  	                              unit_selector("previous-period-units") +
+  	                              '</label>';
   	  forward.addEventListener('click', forward_action);
   	  backward.addEventListener('click', backward_action);
 	  pause.addEventListener('click', pause_action);
@@ -416,14 +451,6 @@ function animate_events(events, options, element) {
 	  step_backward.addEventListener('click', step_backward_action);
 	  faster.addEventListener('click', faster_action);
 	  slower.addEventListener('click', slower_action);
-	  period_input.addEventListener('change', function (event) {
-	  	  period = +event.srcElement.value;
-	  	  refresh();
-	  });
-	  previous_period.addEventListener('change', function (event) {
-	  	  previous_period_duration = +event.srcElement.value;
-	  	  refresh();
-	  });
 	  if (options.legend) {
   	  	  add_legend(options.legend, legend_columns);
   	  } 
@@ -444,6 +471,12 @@ function animate_events(events, options, element) {
   	  add_to_view_and_controls(periods_interface);
   	  update_faster_title();
   	  update_slower_title();
+  	  period_input.addEventListener('change', period_change);
+  	  previous_period.addEventListener('change', previous_period_change);
+  	  setTimeout(function () {
+ 	  document.getElementById("period-units").addEventListener('change', period_change);
+	  document.getElementById("previous-period-units").addEventListener('change', previous_period_change); 	  	
+  	  });
   	  // listen for interface to be added to element
   	  observer.observe(element, {childList: true});
   	  element.appendChild(entire_interface);
