@@ -15,11 +15,11 @@ HTMLWidgets.widget({
         // parse data
         var parser = new DOMParser();
         var events = HTMLWidgets.dataframeToD3(x.events);
-        
-       // var places = HTMLWidgets.dataframeToD3(x.places);
        
-
         var settings = x.settings;
+        settings.legend = HTMLWidgets.dataframeToD3(settings.legend);
+        
+        if (settings.places) settings.places = HTMLWidgets.dataframeToD3(settings.places);
 
         animateEventsWidget.initialise(events, settings);
 
