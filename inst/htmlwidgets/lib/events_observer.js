@@ -16,6 +16,7 @@ function create_event_animator(element) {
 	        resize:  function (new_width, new_height) {
 						 widget.resize(new_width, new_height);
 	                 },
+	        // add_legend interface exposed in case htmlwidget wants to add legend after initialisation
 	        add_legend: function (legend, legend_columns) {
 	        	            widget.add_legend(legend, legend_columns);
 	                    }
@@ -106,9 +107,13 @@ function animate_events(events, options, element) {
 		events.forEach(function (event) {
 			var place = places[event.place_id];
 			if (event.x === undefined) {
-				event.x = place.x;
+				// true_x is where the event's place is located
+				event.true_x = place.x;
+				// x is where it should be displayed
+				event.x      = place.x;
 			}
 			if (event.y === undefined) {
+				event.true_y = place.y;
 				event.y = place.y;
 			}
 		});
@@ -155,17 +160,27 @@ function animate_events(events, options, element) {
    };
 
    var refresh = function () {
-	  	  var now = 0;
-		  var end_time = new Date(earliest_day+(now*period*1000));
+		  var end_time = earliest_day;
 		  var events_from_this_period = [];
 		  var locations_to_events = [];
 		  var spreadout_events_with_the_same_location = function () {
+		  	  var event;
+		  	  if (events_from_this_period.length < 1) {
+		  	  	  return;
+		  	  }
 			  if (events_from_this_period.length < 2) {
+			  	  event = events_from_this_period[0];
+			  	  event.x = event.true_x;
+		  	  	  event.y = event.true_y;
 			  	  return;
 			  }
 			  Object.keys(locations_to_events).map(function (key) {
 			  	  if (locations_to_events[key].length > 1) {
-			  	 	 spreadout(locations_to_events[key]);
+			  	 	  spreadout(locations_to_events[key]);
+			  	  } else {
+			  	  	  event = locations_to_events[key][0];
+			  	      event.x = event.true_x;
+		  	  	      event.y = event.true_y;
 			  	  }
 			  });
 		  };
@@ -181,27 +196,30 @@ function animate_events(events, options, element) {
 		  	  events_at_same_place.forEach(function (event) { 
 		  	      // fraction of the circle to the center of the current circle
 		  	      var angle = (arc_length+event_radius) * 2 * Math.PI / circumference;
-		  	  	  event.x = event.original_x + radius * Math.cos(angle);
-		  	  	  event.y = event.original_y + radius * Math.sin(angle);
+		  	  	  event.x = event.true_x + radius * Math.cos(angle);
+		  	  	  event.y = event.true_y + radius * Math.sin(angle);
 		  	  	  arc_length += event_radius*2;  
 		  	  });
+		  };
+		  var add_event_to_others_this_period = function (event) {
+		  	  events_from_this_period.push(event);
+			  if (locations_to_events[event.place_id]) {
+				  locations_to_events[event.place_id].push(event);
+			  } else {
+				  locations_to_events[event.place_id] = [event];
+			  }
 		  };
 	      events.forEach(function (event, index) {
 							 if (event.time < end_time) {
 							  	 if (inactive_event_types.indexOf(event.color) < 0) {
-								     events_from_this_period.push(event);
-									 if (locations_to_events[event.place_id]) {
-										  locations_to_events[event.place_id].push(event);
-									  } else {
-										  locations_to_events[event.place_id] = [event];
-									  }
+								     add_event_to_others_this_period(event);
 							  	 }
 							 } else {
 								 spreadout_events_with_the_same_location();
-								 now++;
-								 end_time = new Date(earliest_day+(now*period*1000));
+								 end_time += period*1000;
 								 events_from_this_period = [];
 								 locations_to_events = [];
+								 add_event_to_others_this_period(event);
 							 }
 			            });
 	  };
@@ -227,7 +245,7 @@ function animate_events(events, options, element) {
 
   var update = function () {
   	  // move current_period's and previous_period's event sightings into view and move others out
-  	  var date = new Date(earliest_day+1000*(now*period+period));
+  	  var date = new Date(earliest_day+1000*(now*period));
 	  // if integer number of days then just display the date otherwise the date and time
 	  d3.select(time_display).text(period >= 24*60*60 && period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
 	  nodes
@@ -520,6 +538,7 @@ function animate_events(events, options, element) {
 			places = compute_places();
 		} else {
 			// report error
+			alert("The event observer needs either the places or a key (column name) of where the event took place.");
 		}
 	}
 	coordinates_from_place();
@@ -541,8 +560,9 @@ function animate_events(events, options, element) {
 		   if (!latest_time || event.time > latest_time) {
 			   latest_time = event.time;
 		   }
-		   event.original_x = event.x;
-		   event.original_y = event.y;
+		   // if the event has an explicit x and y then treat it as the location to display unless there are other events at the same place
+		   event.true_x = event.x;
+		   event.true_y = event.y;
 	});
 
 	earliest_day = new Date(earliest_time);
