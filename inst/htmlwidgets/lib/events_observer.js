@@ -127,7 +127,7 @@ function animate_events(events, options, element) {
 "   background-color: #fece2f;" +
 "	cursor: pointer;" +
 "}" +
-".event-replay-button, .event-number-input, .event-date-input {" +
+".event-replay-button, .event-number-input, .event-date-input, .event-unit-select {" +
 "	font-family: Segoe UI,Arial,sans-serif;" +
 "	font-weight: bold;	" +
 "	font-size: 1em;" +
@@ -136,6 +136,9 @@ function animate_events(events, options, element) {
 "}" +
 ".event-date-input {" +
 "   width: 16ch;" +
+"}" +
+".event-unit-select {" +
+"   width: 9ch;" +	
 "}" +
 ".event-text {" +
 "	font-family: Segoe UI,Arial,sans-serif;" +
@@ -458,7 +461,7 @@ function animate_events(events, options, element) {
 	  var date_selectors    = document.createElement('div');
 	  var periods_interface = document.createElement('div');
 	  var unit_selector = function (id) {
-	  	  return '<select class="event-text" id="' + id + '">' + 
+	  	  return '<select class="event-unit-select" id="' + id + '">' + 
   	             '<option name="seconds">seconds</option>' +
   	             '<option name="minutes">minutes</option>' +
   	             '<option name="hours">hours</option>' +
