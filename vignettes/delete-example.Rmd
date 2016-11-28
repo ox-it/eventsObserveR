@@ -1,6 +1,70 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+# Header
+
+Pretend creatures species
+
+```{r}
+# http://jimpix.co.uk/generators/word-generator.asp#results
+pretend_creatures <- c(
+  "ant",
+  "buffalo",
+  "donkey",
+  "hound" ,
+  "panda" ,
+  "badger" ,
+  "moth" ,
+  "zebra" ,
+  "turtle" ,
+  "cod",
+  "mongoose",
+  "dingo" ,
+  "capon" ,
+  "heron" ,
+  "bacteria",
+  "wildcat" ,
+  "otter" ,
+  "butterfly",
+  "flyingfish",
+  "porcupine" ,
+  "kangaroo" ,
+  "baboon" ,
+  "gibbon" ,
+  "prairiedog",
+  "rhinoceros" ,
+  "vulture" ,
+  "ptarmigan",
+  "oyster" ,
+  "goshawk" ,
+  "eland" ,
+  "blackfish",
+  "lice" ,
+  "hamster",
+  "seafowl" ,
+  "yak" ,
+  "turtledove",
+  "hoopoe"
+)
+```
+
+
+```{r}
 library(tidyverse)
 library(lubridate)
 library(viridis)
+library(htmlwidgets)
+library(eventsObserveR)
 emre_data <- read.csv("http://users.ox.ac.uk/~oucs0030/temp/FOQMRuVAifoTmfWMDgsz6a.csv", stringsAsFactors = F)
 
 
@@ -23,8 +87,6 @@ emre_data <- emre_data %>%
 
 emre_data <- emre_data %>%
   mutate(radius = rep(5, nrow(emre_data)))
-
-htmlwidgets::HTMLWidgets.dataframeToD3(emre_data)
 
 emre_data <- emre_data %>%
   mutate(time = as.integer(time) * 1000)
@@ -73,16 +135,26 @@ emre_data$title <- title
 #   mutate(title = paste(No..Individuals, Species, Camera.ID, time))
 
 
+# eventsObserveR(events = emre_data, place.key = "station", legend = legend.df, legend.columns = 2)
+
+emre_data %>%
+  select(Species) %>%
+  unique() %>%
+  unlist(use.names = F) %>%
+  length()
+
+replace(emre_data$Species, unique(emre_data$Species), )
+
+
 eventsObserveR(events = emre_data, place.key = "station",
                legend = legend.df,
-               # legend.columns = 2,
+               legend.columns = 2,
                size = list(
                  view.width = 600,
                  view.height = 600,
-                 interface.width = 1024, 
+                 interface.width = 1624, 
                  interface.height = 786))
 
 
-
-
+```
 
