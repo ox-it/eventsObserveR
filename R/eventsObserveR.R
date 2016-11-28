@@ -1,3 +1,15 @@
+#' eventsObserver
+#' 
+#' \code{eventsObserveR} creates an playable visualisation of the distribution of event observations over a range of defined places within a variable time period.
+#' 
+#' @param places A dataframe with events, needs at least place.key, time
+#' \itemize{
+#'  \item{"place.key"}{ : unique "place" id, does not need to be numeric}
+#'  \item{"time"}{ : integer time of event, cannot be as.POSIXct}
+#'  \item{"title"}{ : tooltip of the event}
+#'  \item{...}{}
+#'  }
+#'  
 #' @import htmlwidgets
 #' @export
 eventsObserveR <- function(events, 
