@@ -125,6 +125,7 @@ function animate_events(events, options, element) {
 "button {" +
 "	font-size: 1.2em;" +
 "	border-radius: 6px;" +
+"   background-color: #fece2f" +
 "	cursor: pointer;" +
 "}" +
 ".event-replay-button, .event-number-input {" +
@@ -378,7 +379,43 @@ function animate_events(events, options, element) {
 	  };
 	  var create_legend = function (legend_data, columns) {
 	  	  var table = document.createElement('table');
-	  	  var row;
+	  	  var create_button = function (label) {
+	  	  	  var button = document.createElement('button');
+	  	  	  button.innerHTML = '<b class="event-replay-button">' + label + '</b>';
+	  	  	  return button;
+	  	  };
+	  	  var select_all   = create_button('Select all');
+	  	  var deselect_all = create_button('Deselect all');
+	  	  var keys = [];
+	  	  var row, td;
+	  	  select_all  .addEventListener('click', 
+	  	                                function () { 
+	  	                                	inactive_event_types = [];
+	  	                                	keys.forEach(function (key) {
+	  	                                		key.className = "event-key-active";
+	  	                                	});
+	  	                                	refresh();
+	  	  	                       	        update(); 
+	  	  	                       	    });
+	  	  deselect_all.addEventListener('click',
+	  	                                function () { 
+	  	                                	inactive_event_types = legend_data.map(function (entry) {
+	  	                                	                                           return entry.color;
+	  	                                										   });
+	  	                                    keys.forEach(function (key) {
+	  	                                        key.className = "event-key-inactive";
+	  	                                	});
+	  	                                	refresh();
+	  	  	                       	        update(); 
+	  	  	                       	    });
+	  	  row = document.createElement('tr');
+	  	  td  = document.createElement('td');
+	  	  td.appendChild(select_all);
+	  	  row.appendChild(td);
+	  	  td  = document.createElement('td');
+	  	  td.appendChild(deselect_all);
+	  	  table.appendChild(row);
+	  	  row.appendChild(td); 	           
 	  	  table.className = "event-legend";
 	  	  legend_data.forEach(function (entry, index) {
 	  	  	  var key         = document.createElement('td');
@@ -409,6 +446,7 @@ function animate_events(events, options, element) {
 	  	  	  description.className = "event-legend-description";
 	  	  	  row.appendChild(key);
 	  	  	  row.appendChild(description);
+	  	  	  keys.push(key);
 	  	  });
 	  	  return table;
 	  };
