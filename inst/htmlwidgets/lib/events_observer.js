@@ -1,8 +1,6 @@
 // Developed by Ken Kahn and Martin Hadley of IT Services, University of Oxford
 // copyright??
 
-<!-- very loosely based upon https://bl.ocks.org/mbostock/4062045 -->
-
 function create_event_animator(element) {
 	// interface for HTMLWidgets in R
 	var widget;
@@ -64,6 +62,7 @@ function animate_events(events, options, element) {
 	var paused            = true;
 	var play_direction    = 1; // forward one period
 	var formatDate        = d3.timeFormat("%d %b %Y");
+	var formatDateInput   = d3.timeFormat("%Y-%m-%d");
 	var formatCurrentTime = d3.timeFormat("%d %b %y %H:%M:%S");
 	var inactive_event_types = [];
 
@@ -89,7 +88,7 @@ function animate_events(events, options, element) {
 	       var ellipse_width      = view_width /2-horizontal_margin;
 	       var ellipse_height     = (view_height/2-vertical_margin);
 	       var ellipse_circumference = 2 * Math.PI * Math.sqrt((ellipse_width * ellipse_width + ellipse_height * ellipse_height) / 2);
-	       var radius            = options.place_radius || ellipse_circumference / (2 * place_names.length);
+	       var radius             = options.place_radius || ellipse_circumference / (2 * place_names.length);
            return {x:      ellipse_width  * Math.cos(index * theta + rotation) + view_width/2, 
                    y:      ellipse_height * Math.sin(index * theta + rotation) + view_height/2,
                    radius: radius,
@@ -128,11 +127,15 @@ function animate_events(events, options, element) {
 "   background-color: #fece2f;" +
 "	cursor: pointer;" +
 "}" +
-".event-replay-button, .event-number-input {" +
+".event-replay-button, .event-number-input, .event-date-input {" +
 "	font-family: Segoe UI,Arial,sans-serif;" +
 "	font-weight: bold;	" +
 "	font-size: 1em;" +
+"	border-radius: 6px;" +
 "   width: 8ch;" +
+"}" +
+".event-date-input {" +
+"   width: 16ch;" +
 "}" +
 ".event-text {" +
 "	font-family: Segoe UI,Arial,sans-serif;" +
@@ -161,92 +164,84 @@ function animate_events(events, options, element) {
    };
 
    var refresh = function () {
-		  var end_time = earliest_day;
-		  var events_from_this_period = [];
-		  var locations_to_events = [];
-		  var spreadout_events_with_the_same_location = function () {
-		  	  var event;
-		  	  if (events_from_this_period.length < 1) {
-		  	  	  return;
-		  	  }
-			  if (events_from_this_period.length < 2) {
-			  	  event = events_from_this_period[0];
-			  	  event.x = event.true_x;
-		  	  	  event.y = event.true_y;
-			  	  return;
-			  }
-			  Object.keys(locations_to_events).map(function (key) {
-			  	  if (locations_to_events[key].length > 1) {
-			  	 	  spreadout(locations_to_events[key]);
-			  	  } else {
-			  	  	  event = locations_to_events[key][0];
-			  	      event.x = event.true_x;
-		  	  	      event.y = event.true_y;
-			  	  }
+       var end_time = earliest_day;
+       var events_from_this_period = [];
+       var locations_to_events = [];
+       var spreadout_events_with_the_same_location = function () {
+       	   var event;
+       	   if (events_from_this_period.length < 1) {
+       	  	   return;
+       	   }
+	       if (events_from_this_period.length < 2) {
+	           event = events_from_this_period[0];
+			   event.x = event.true_x;
+		  	   event.y = event.true_y;
+			   return;
+		   }
+		   Object.keys(locations_to_events).map(function (key) {
+			   if (locations_to_events[key].length > 1) {
+			  	   spreadout(locations_to_events[key]);
+			   } else {
+			  	   event = locations_to_events[key][0];
+			  	   event.x = event.true_x;
+		  	  	   event.y = event.true_y;
+			   }
 			  });
-		  };
-		  var spreadout = function (events_at_same_place) {
-		  	  var circumference = 0;		  	  
-		  	  var radius = 0;
-		  	  var arc_length = 0;
-		  	  var event_radius = event.radius || options.event_radius || 5;
-		  	  events_at_same_place.forEach(function (event) {
-		  	  	  circumference += event_radius*2;
-		  	  }); 	  
-		  	  radius = circumference / (2 * Math.PI);
-		  	  events_at_same_place.forEach(function (event) { 
-		  	      // fraction of the circle to the center of the current circle
-		  	      var angle = (arc_length+event_radius) * 2 * Math.PI / circumference;
-		  	  	  event.x = event.true_x + radius * Math.cos(angle);
-		  	  	  event.y = event.true_y + radius * Math.sin(angle);
-		  	  	  arc_length += event_radius*2;  
-		  	  });
-		  };
-		  var add_event_to_others_this_period = function (event) {
-		  	  events_from_this_period.push(event);
-			  if (locations_to_events[event.place_id]) {
-				  locations_to_events[event.place_id].push(event);
-			  } else {
-				  locations_to_events[event.place_id] = [event];
-			  }
-		  };
-	      events.forEach(function (event, index) {
-							 if (event.time < end_time) {
-							  	 if (inactive_event_types.indexOf(event.color) < 0) {
-								     add_event_to_others_this_period(event);
-							  	 }
-							 } else {
-								 spreadout_events_with_the_same_location();
-								 end_time += period*1000;
-								 events_from_this_period = [];
-								 locations_to_events = [];
-								 add_event_to_others_this_period(event);
-							 }
-			            });
-	  };
+		};
+		var spreadout = function (events_at_same_place) {
+		  	var circumference = 0;		  	  
+		  	var radius = 0;
+		  	var arc_length = 0;
+		    var event_radius = event.radius || options.event_radius || 5;
+		  	events_at_same_place.forEach(function (event) {
+		  	    circumference += event_radius*2;
+		  	}); 	  
+		  	radius = circumference / (2 * Math.PI);
+		  	events_at_same_place.forEach(function (event) { 
+		  	    // fraction of the circle to the center of the current circle
+		  	    var angle = (arc_length+event_radius) * 2 * Math.PI / circumference;
+		  	  	event.x = event.true_x + radius * Math.cos(angle);
+		  	    event.y = event.true_y + radius * Math.sin(angle);
+		  	  	arc_length += event_radius*2;  
+		  	});
+		};
+		var add_event_to_others_this_period = function (event) {
+		    events_from_this_period.push(event);
+			if (locations_to_events[event.place_id]) {
+			    locations_to_events[event.place_id].push(event);
+			} else {
+			    locations_to_events[event.place_id] = [event];
+		    }
+		};
+	    events.forEach(function (event, index) {
+						   if (event.time > end_time) {
+							   spreadout_events_with_the_same_location();
+							   end_time += period*1000;
+							   events_from_this_period = [];
+							   locations_to_events = [];
+						   }
+						   if (inactive_event_types.indexOf(event.color) < 0) {
+							   add_event_to_others_this_period(event);
+						   }
+			          });
+    };
 
-  var now = 0;
+    var now; // displays events >= now and less than now+period*1000
 
-  var current_period = function (time) {
-  	  if (time.getTime) {
-  	  	  time = time.getTime();
-  	  }
-  	  return time-earliest_day >= 1000*(now*period) &&
-      	     time-earliest_day <  1000*(now*period+period);
-  };
+    var current_period = function (time) {
+  	    return time >= now &&
+      	       time <  now+1000*period;
+    };
 
-  var previous_period = function (time) {
-  	  if (time.getTime) {
-  	  	  time = time.getTime();
-  	  }  	
-  	  return paused &&
-  	         time-earliest_day >= 1000*(now*period-previous_period_duration) &&
-      	     time-earliest_day <  1000*(now*period);
-  };
+    var previous_period = function (time) {
+  	    return paused && // only display previous period events if paused
+  	           time >= now-previous_period_duration*1000 &&
+      	       time <  now;
+    };
 
-  var update = function () {
+    var update = function () {
   	  // move current_period's and previous_period's event sightings into view and move others out
-  	  var date = new Date(earliest_day+1000*(now*period));
+  	  var date = new Date(now);
 	  // if integer number of days then just display the date otherwise the date and time
 	  d3.select(time_display).text(period >= 24*60*60 && period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
 	  nodes
@@ -284,48 +279,57 @@ function animate_events(events, options, element) {
 	   .attr("r",     function (d) {
       	                  return d.radius;
                       });
-  };
+    };
 
-  var tick = function() {
+    var tick = function() {
 	  update();
 	  if (paused) {
 	  	  return;
 	  }
-      now += play_direction;
-      if (now < 0) {
-      	  now = 0;
+      now += play_direction*period*1000;
+      if (now < start_date || now < earliest_day) {
+      	  now = Math.max(earliest_day, start_date);
+      	  paused = true; // reached the start date playing in reverse
+      	  update();
+      	  return;
       }
-      if (earliest_time+now*period*1000 <= latest_time && now >= 0) {
+      if (now <= latest_time && 
+          now <= end_date) {
     	  setTimeout(tick, 1000/periods_per_second);
       } else {
       	  // since got the end of the log
+      	  now = Math.min(latest_day, end_date);
       	  paused = true;
+      	  update();
       }
-  };
+    };
 
-  var view_and_controls = document.createElement('table');
+    var view_and_controls = document.createElement('table');
 
-  var add_to_view_and_controls = function (element) {
+    var add_to_view_and_controls = function (element) {
 	  var row   = document.createElement('tr');
 	  var entry = document.createElement('td');
 	  entry.appendChild(element);
 	  row.appendChild(entry);
 	  view_and_controls.appendChild(row);
-  };
+    };
 
-  var add_play_buttons = function () {
-  	  var forward         = document.createElement('button');
-  	  var backward        = document.createElement('button');
-  	  var pause           = document.createElement('button');
-  	  var step_forward    = document.createElement('button');
-  	  var step_backward   = document.createElement('button');
-  	  var faster          = document.createElement('button');
-  	  var slower          = document.createElement('button');
-  	  var space           = document.createElement('span');
-  	  var space2          = document.createElement('span');
-  	  var period_input    = document.createElement('span');
-  	  var previous_period = document.createElement('span');
-  	  var br              = document.createElement('br');
+    var add_play_buttons = function () {
+  	  var forward          = document.createElement('button');
+  	  var backward         = document.createElement('button');
+  	  var pause            = document.createElement('button');
+  	  var step_forward     = document.createElement('button');
+  	  var step_backward    = document.createElement('button');
+  	  var faster           = document.createElement('button');
+  	  var slower           = document.createElement('button');
+  	  var space            = document.createElement('span');
+  	  var space2           = document.createElement('span');
+  	  var space3           = document.createElement('span');
+  	  var period_input     = document.createElement('span');
+  	  var previous_period  = document.createElement('span');
+  	  var start_date_input = document.createElement('span');
+  	  var end_date_input   = document.createElement('span');
+  	  var br               = document.createElement('br');
   	  var forward_action   =    function () {
 								     play_direction = 1;
 								     if (paused) {
@@ -345,11 +349,11 @@ function animate_events(events, options, element) {
 								     update();
 							     };
 	  var step_forward_action =  function () {
-	                                 now++;
+	                                 now += period*1000;
 	                                 update();
 	                             };
 	  var step_backward_action = function () {
-	                                 now--;
+	                                 now -= period*1000;
 	                                 update();
 	                             };
 	  var faster_action        = function () {
@@ -451,6 +455,7 @@ function animate_events(events, options, element) {
 	  	  return table;
 	  };
 	  var video_player      = document.createElement('div');
+	  var date_selectors    = document.createElement('div');
 	  var periods_interface = document.createElement('div');
 	  var unit_selector = function (id) {
 	  	  return '<select class="event-text" id="' + id + '">' + 
@@ -473,9 +478,7 @@ function animate_events(events, options, element) {
 	  var period_change = function (event) {
 	  	  var units_selector = document.getElementById("period-units");
 	  	  var period_input = document.getElementById("period-input");
-	  	  var now_in_seconds = now*period;
 	  	  period = (+period_input.value)*seconds_per_unit(units_selector.value);
-	  	  now = Math.floor(now_in_seconds/period);
 	  	  refresh();
 	  };
 	  var previous_period_change = function (event) {
@@ -483,6 +486,12 @@ function animate_events(events, options, element) {
 	  	  var period_input = document.getElementById("previous-period-input");
 	  	  previous_period_duration = (+period_input.value)*seconds_per_unit(units_selector.value);
 	  	  refresh();
+	  };
+	  var time_from_input = function (id) {
+	  	  var date = new Date(document.getElementById(id).value).getTime(); // in milliseconds since epoch
+	  	  // may differ from an integer number of periods due to daylight savings or leap seconds
+	  	  var error = (date-earliest_day)%(period*1000);
+  		  return date-error;
 	  };
 	  entire_interface.appendChild(view_and_controls);
 	  view_and_controls.className = 'event-view-and-controls';
@@ -495,6 +504,7 @@ function animate_events(events, options, element) {
   	  slower.innerHTML          = '<b class="event-replay-button">Slower</b>';
   	  space.innerHTML           = '&nbsp;&nbsp;';
   	  space2.innerHTML          = '&nbsp;&nbsp;';
+  	  space3.innerHTML          = '&nbsp;&nbsp;';
   	  period_input.innerHTML    = '<label class="event-number-input" title="View all events that occured within this period of time.">' + 
   	                              'Period: ' + 
   	                              '<input class="event-number-input" type="number" id="period-input" value="' + period + '">' +
@@ -527,12 +537,32 @@ function animate_events(events, options, element) {
   	  video_player.appendChild(time_display);
   	  time_display.className = "event-text";
   	  add_to_view_and_controls(video_player);
+      start_date_input.innerHTML = '<label class="event-date-input" title="View all events that occured this date or after.">' + 
+								   'Start: ' + 
+								   '<input class="event-date-input" type="date" id="start-date-input" value="' + formatDateInput(new Date(earliest_day)) + '">' +
+								   '</label>';
+      end_date_input.innerHTML   = '<label class="event-date-input" title="View all events that occured this date or before.">' + 
+								   'End: ' + 
+								   '<input class="event-date-input" type="date" id="end-date-input" value="'   + formatDateInput(new Date(latest_day)) + '">' +
+								   '</label>';  	  	
+   	  start_date_input.addEventListener('change',
+									    function (event) {
+										    start_date = time_from_input("start-date-input");
+									    });
+  	  end_date_input.addEventListener(  'change',
+  	                              	    function (event) {
+  	                              	        end_date =   time_from_input("end-date-input")+period;
+  	                                    });
+  	  date_selectors.appendChild(start_date_input);
+  	  date_selectors.appendChild(space3);
+  	  date_selectors.appendChild(end_date_input);
+  	  add_to_view_and_controls(date_selectors);
   	  periods_interface.appendChild(period_input);
   	  periods_interface.appendChild(previous_period);
   	  add_to_view_and_controls(periods_interface);
   	  update_faster_title();
   	  update_slower_title();
-  	  period_input.addEventListener('change', period_change);
+  	  period_input   .addEventListener('change', period_change);
   	  previous_period.addEventListener('change', previous_period_change);
   	  setTimeout(function () {
  	  document.getElementById("period-units").addEventListener('change', period_change);
@@ -541,9 +571,9 @@ function animate_events(events, options, element) {
   	  // listen for interface to be added to element
   	  observer.observe(element, {childList: true});
   	  element.appendChild(entire_interface);
-  };
-  // need to wait until interface is added to element before discovering its dimensions to scale it to fit the specified dimensions
-  var observer = new MutationObserver(function (mutations) {
+    };
+    // need to wait until interface is added to element before discovering its dimensions to scale it to fit the specified dimensions
+    var observer = new MutationObserver(function (mutations) {
                                           mutations.some(function(mutation) {
                                                              var i;
                                                              // mutation.addedNodes is a NodeList so can't use forEach
@@ -556,19 +586,19 @@ function animate_events(events, options, element) {
                                                          });
                                       });
   
-  var scale_to_fit = function (interface_width, interface_height) {
+    var scale_to_fit = function (interface_width, interface_height) {
                          var scale = Math.min(interface_width  / entire_interface.clientWidth, interface_height / entire_interface.clientHeight);
                          entire_interface.style.transform = "scale("+ scale + "," + scale + ")";
                          entire_interface.style["transform-origin"] = "0 0";
-  };
+    };
 
-  var entire_interface = document.createElement('div');
+    var entire_interface = document.createElement('div');
 
-  var time_display     = document.createElement('span');
+    var time_display     = document.createElement('span');
 
-  var svg_element      = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    var svg_element      = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
-  var nodes, svg, earliest_time, latest_time, earliest_day;
+    var nodes, svg, earliest_time, latest_time, earliest_day, latest_day, start_date, end_date;
 
 	if (!places) {
 		if (options.place_key) {
@@ -580,13 +610,6 @@ function animate_events(events, options, element) {
 		}
 	}
 	coordinates_from_place();
-    add_css();
-    add_to_view_and_controls(svg_element);
-    add_play_buttons();
-
-	svg = d3.select("svg")
-				  .attr("width",  view_width)
-				  .attr("height", view_height);
 
 	events.forEach(function (event) {
 		   if (event.time.getTime) {
@@ -608,7 +631,14 @@ function animate_events(events, options, element) {
 	earliest_day.setMinutes(0);
 	earliest_day.setSeconds(0);
 	earliest_day = earliest_day.getTime(); // milliseconds since 1 January 1970
-
+	now = earliest_day;
+	start_date = now;
+	latest_day = new Date(latest_time);
+	latest_day.setHours(0);
+	latest_day.setMinutes(0);
+	latest_day.setSeconds(0);
+	latest_day = latest_day.getTime();
+    end_date = latest_day;
 	events.sort(function (a, b) {
 	       	        if (a.time < b.time) {
 	       	            return -1;
@@ -618,6 +648,15 @@ function animate_events(events, options, element) {
 	       	        }
 	       	        return 0;
 	       });
+
+
+    add_css();
+    add_to_view_and_controls(svg_element);
+    add_play_buttons();
+
+	svg = d3.select("svg")
+				  .attr("width",  view_width)
+				  .attr("height", view_height);
 
 	  refresh();
     	            
