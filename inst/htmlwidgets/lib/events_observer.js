@@ -125,7 +125,7 @@ function animate_events(events, options, element) {
 "button {" +
 "	font-size: 1.2em;" +
 "	border-radius: 6px;" +
-"   background-color: #fece2f" +
+"   background-color: #fece2f;" +
 "	cursor: pointer;" +
 "}" +
 ".event-replay-button, .event-number-input {" +
