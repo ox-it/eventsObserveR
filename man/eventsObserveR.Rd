@@ -12,9 +12,33 @@ eventsObserveR(events, places = NULL, place.key = "place",
   event.color = "red", legend = NULL, legend.columns = 1)
 }
 \arguments{
-\item{places}{A dataframe with events, needs at least place.key, time
+\item{events}{A data.frame with events, needs at least place.key, time
 \itemize{
- \item{"place.key"}{ : unique "place" id, does not need to be numeric}
+ \item{"place"}{ : unique "place" id, does not need to be numeric}
+ \item{"time"}{ : integer time of event, cannot be as.POSIXct}
+ \item{"title"}{ : tooltip of the event}
+ \item{...}{}
+ }}
+
+\item{places}{An optional data.frame for place locations, if NULL places will be set to fill outline a circle that fills the available space. Default to NULL
+\itemize{
+ \item{"place"}{ : unique "place" id, does not need to be numeric}
+ \item{"time"}{ : integer time of event, cannot be as.POSIXct}
+ \item{"title"}{ : tooltip of the event}
+ \item{...}{}
+ }}
+
+\item{place.key}{Name of column containing place.key in the events data.frame (defaults to place).}
+
+\item{periodsPerSecond}{Equivalent to number of "frames per second when playing" the eventsObserver animation. Default 24.}
+
+\item{period}{Period within which events must occur to be displayed as filled dots. Default to 86400 seconds.}
+
+\item{previousPeriodDuration}{Period within which events occuring prior to "period" will be included in the visualisation and displayed as empty dots. Default to 86400 seconds.}
+
+\item{size}{Optional list of named arguments:
+\itemize{
+ \item{"place"}{ : unique "place" id, does not need to be numeric}
  \item{"time"}{ : integer time of event, cannot be as.POSIXct}
  \item{"title"}{ : tooltip of the event}
  \item{...}{}

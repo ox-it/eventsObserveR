@@ -2,9 +2,27 @@
 #' 
 #' \code{eventsObserveR} creates an playable visualisation of the distribution of event observations over a range of defined places within a variable time period.
 #' 
-#' @param places A dataframe with events, needs at least place.key, time
+#' @param events A data.frame with events, needs at least place.key, time
 #' \itemize{
-#'  \item{"place.key"}{ : unique "place" id, does not need to be numeric}
+#'  \item{"place"}{ : unique "place" id, does not need to be numeric}
+#'  \item{"time"}{ : integer time of event, cannot be as.POSIXct}
+#'  \item{"title"}{ : tooltip of the event}
+#'  \item{...}{}
+#'  }
+#' @param places An optional data.frame for place locations, if NULL places will be set to fill outline a circle that fills the available space. Default to NULL
+#' \itemize{
+#'  \item{"place"}{ : unique "place" id, does not need to be numeric}
+#'  \item{"time"}{ : integer time of event, cannot be as.POSIXct}
+#'  \item{"title"}{ : tooltip of the event}
+#'  \item{...}{}
+#'  }
+#' @param place.key Name of column containing place.key in the events data.frame (defaults to place).
+#' @param periodsPerSecond Equivalent to number of "frames per second when playing" the eventsObserver animation. Default 24.
+#' @param period Period within which events must occur to be displayed as filled dots. Default to 86400 seconds.
+#' @param previousPeriodDuration Period within which events occuring prior to "period" will be included in the visualisation and displayed as empty dots. Default to 86400 seconds.
+#' @param size Optional list of named arguments:
+#' \itemize{
+#'  \item{"place"}{ : unique "place" id, does not need to be numeric}
 #'  \item{"time"}{ : integer time of event, cannot be as.POSIXct}
 #'  \item{"title"}{ : tooltip of the event}
 #'  \item{...}{}
