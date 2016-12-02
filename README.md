@@ -10,6 +10,8 @@ eventsObserveR(events = emre_data, place.key = "station",
                legend.columns = 2)
 ```
 
+<img src="/vignettes/eventsObserver.gif" width="400px"></img>
+
 # Installation
 
 This package is not available from CRAN, you must install it from Github as follows:
