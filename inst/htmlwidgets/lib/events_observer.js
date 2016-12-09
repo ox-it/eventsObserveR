@@ -61,9 +61,7 @@ function animate_events(events, options, element) {
 
 	var paused            = true;
 	var play_direction    = 1; // forward one period
-	var formatDate        = d3.timeFormat("%d %b %Y");
 	var formatDateInput   = d3.timeFormat("%Y-%m-%d");
-	var formatCurrentTime = d3.timeFormat("%d %b %y %H:%M:%S");
 	var inactive_event_types = [];
 
 	var compute_places = function () {
@@ -246,7 +244,7 @@ function animate_events(events, options, element) {
   	  // move current_period's and previous_period's event sightings into view and move others out
   	  var date = new Date(now);
 	  // if integer number of days then just display the date otherwise the date and time
-	  d3.select(time_display).text(period >= 24*60*60 && period%(24*60*60) === 0 ? formatDate(date) : formatCurrentTime(date));
+	  d3.select(time_display).text(period >= 24*60*60 && period%(24*60*60) === 0 ? date.toLocaleDateString() : date.toLocaleString());
 	  nodes
        .attr("cx",     function (d) {
        	                   if (inactive_event_types.indexOf(d.color) >= 0) {
