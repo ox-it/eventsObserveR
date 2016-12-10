@@ -476,15 +476,15 @@ function animate_events(events, options, element) {
 	  	  	default: return 1;
 	  	  }
 	  };
-	  var period_change = function (event) {
+	  var period_change = function () {
 	  	  var units_selector = document.getElementById("period-units");
-	  	  var period_input = document.getElementById("period-input");
+	  	  var period_input   = document.getElementById("period-input");
 	  	  period = (+period_input.value)*seconds_per_unit(units_selector.value);
 	  	  refresh();
 	  };
-	  var previous_period_change = function (event) {
+	  var previous_period_change = function () {
 	  	  var units_selector = document.getElementById("previous-period-units");
-	  	  var period_input = document.getElementById("previous-period-input");
+	  	  var period_input   = document.getElementById("previous-period-input");
 	  	  previous_period_duration = (+period_input.value)*seconds_per_unit(units_selector.value);
 	  	  refresh();
 	  };
@@ -525,7 +525,7 @@ function animate_events(events, options, element) {
 	  slower.addEventListener('click', slower_action);
 	  if (options.legend) {
   	  	  add_legend(options.legend, legend_columns);
-  	  } 
+  	  }
 	  video_player.appendChild(backward);
   	  video_player.appendChild(step_backward);
   	  video_player.appendChild(pause);
@@ -545,7 +545,7 @@ function animate_events(events, options, element) {
       end_date_input.innerHTML   = '<label class="event-date-input" title="View all events that occured this date or before.">' + 
 								   'End: ' + 
 								   '<input class="event-date-input" type="date" id="end-date-input" value="'   + formatDateInput(new Date(latest_day)) + '">' +
-								   '</label>';  	  	
+								   '</label>';
    	  start_date_input.addEventListener('change',
 									    function (event) {
 										    start_date = time_from_input("start-date-input");
@@ -566,8 +566,15 @@ function animate_events(events, options, element) {
   	  period_input   .addEventListener('change', period_change);
   	  previous_period.addEventListener('change', previous_period_change);
   	  setTimeout(function () {
- 	  document.getElementById("period-units").addEventListener('change', period_change);
-	  document.getElementById("previous-period-units").addEventListener('change', previous_period_change); 	  	
+  	  	  // delay to be sure these have been added to the DOM
+  	  	  var period_units = document.getElementById("period-units");
+  	  	  var previous_period_units = document.getElementById("previous-period-units");
+		  period_units.addEventListener('change', period_change);
+		  previous_period_units.addEventListener('change', previous_period_change);
+		  period_units.value          = options.period_units          || "days";
+		  previous_period_units.value = options.previous_period_units || "days";
+		  period_change();
+		  previous_period_change();
   	  });
   	  // listen for interface to be added to element
   	  observer.observe(element, {childList: true});
@@ -713,7 +720,7 @@ function animate_events(events, options, element) {
         return -1;
     });
 
-    update();
+    setTimeout(update); // delay until units and periods have settled down
 
     return {refresh: refresh,
             resize:  function (width, height) {
