@@ -136,7 +136,7 @@ function animate_events(events, options, element) {
 "   width: 16ch;" +
 "}" +
 ".event-unit-select {" +
-"   width: 9ch;" +	
+"   width: 13ch;" +	/* wider than needed since IE11 puts the selector on the end */
 "}" +
 ".event-text {" +
 "	font-family: Segoe UI,Arial,sans-serif;" +
@@ -190,17 +190,17 @@ function animate_events(events, options, element) {
 			  });
 		};
 		var spreadout = function (events_at_same_place) {
-		  	var circumference = 0;		  	  
+		  	var circumference = 0;
 		  	var radius = 0;
 		  	var arc_length = 0;
-		    var event_radius = event.radius || options.event_radius || 5;
+		    var event_radius = options.event_radius || 5;
 		  	events_at_same_place.forEach(function (event) {
 		  	    circumference += event_radius*2;
-		  	}); 	  
+		  	});
 		  	radius = circumference / (2 * Math.PI);
 		  	events_at_same_place.forEach(function (event) { 
 		  	    // fraction of the circle to the center of the current circle
-		  	    var angle = (arc_length+event_radius) * 2 * Math.PI / circumference;
+		  	    var angle = (arc_length+(event.radius || event_radius)) * 2 * Math.PI / circumference;
 		  	  	event.x = event.true_x + radius * Math.cos(angle);
 		  	    event.y = event.true_y + radius * Math.sin(angle);
 		  	  	arc_length += event_radius*2;  
@@ -249,7 +249,7 @@ function animate_events(events, options, element) {
        .attr("cx",     function (d) {
        	                   if (inactive_event_types.indexOf(d.color) >= 0) {
        	                   	   return -1000;
-       	                   }   	                   
+       	                   }
 						   if (current_period(d.time) || previous_period(d.time)) {
 							   return d.x;
 						   }
@@ -650,7 +650,6 @@ function animate_events(events, options, element) {
 	       	        return 0;
 	       });
 
-
     add_css();
     add_to_view_and_controls(svg_element);
     add_play_buttons();
@@ -660,7 +659,7 @@ function animate_events(events, options, element) {
 				  .attr("height", view_height);
 
 	  refresh();
-    	            
+
     // add nodes for each event
     nodes = svg
 		 .append("g")
@@ -681,7 +680,7 @@ function animate_events(events, options, element) {
 						return d.y;
 					 });
 
-    nodes             
+    nodes
 		.append("title")
 		  .text(function (d) { 
 					return d.title; 
