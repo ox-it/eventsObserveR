@@ -22,7 +22,7 @@ function create_event_animator(element) {
 };
 
 function animate_events(events, options, element) {
-	// events should be an array of objects with 
+	// events should be an array of objects with
 	//   event_type_id (a number between 0 and one less than the number of unique event types),
 	//   time (a JavaScript Date object) or an integer corresponding to the number milliseconds since 1 January, 1970.
 	// and optionally
@@ -53,7 +53,7 @@ function animate_events(events, options, element) {
 	var view_width               = options.view_width                    ||  700;
 	var view_height              = options.view_height                   ||  500;
 	var interface_width          = options.width                         || 1024;
-	var interface_height         = options.height                        ||  786; 		
+	var interface_height         = options.height                        ||  786;
 	var periods_per_second       = options.periods_per_second            ||   24;
 	var period                   = options.period                        || 24*60*60; // in seconds
 	var legend_columns           = options.legend_columns                ||    2;
@@ -71,7 +71,7 @@ function animate_events(events, options, element) {
 		events.forEach(function (event) {
 			if (event[place_key] && place_names.indexOf(event[place_key]) < 0) {
 				place_names.push(event[place_key]);
-			}	
+			}
 		});
 		if (place_names.length === 0) {
 			alert("Error: either places or a place_key used in the events needs to be provided.");
@@ -87,7 +87,7 @@ function animate_events(events, options, element) {
 	       var ellipse_height     = (view_height/2-vertical_margin);
 	       var ellipse_circumference = 2 * Math.PI * Math.sqrt((ellipse_width * ellipse_width + ellipse_height * ellipse_height) / 2);
 	       var radius             = options.place_radius || ellipse_circumference / (2 * place_names.length);
-           return {x:      ellipse_width  * Math.cos(index * theta + rotation) + view_width/2, 
+           return {x:      ellipse_width  * Math.cos(index * theta + rotation) + view_width/2,
                    y:      ellipse_height * Math.sin(index * theta + rotation) + view_height/2,
                    radius: radius,
 		           color:  place_color,
@@ -118,7 +118,7 @@ function animate_events(events, options, element) {
 
 	var add_css = function () {
 		var style = document.createElement('style');
-		style.textContent = 
+		style.textContent =
 "button {" +
 "	font-size: 1.2em;" +
 "	border-radius: 6px;" +
@@ -198,12 +198,12 @@ function animate_events(events, options, element) {
 		  	    circumference += event_radius*2;
 		  	});
 		  	radius = circumference / (2 * Math.PI);
-		  	events_at_same_place.forEach(function (event) { 
+		  	events_at_same_place.forEach(function (event) {
 		  	    // fraction of the circle to the center of the current circle
 		  	    var angle = (arc_length+(event.radius || event_radius)) * 2 * Math.PI / circumference;
 		  	  	event.x = event.true_x + radius * Math.cos(angle);
 		  	    event.y = event.true_y + radius * Math.sin(angle);
-		  	  	arc_length += event_radius*2;  
+		  	  	arc_length += event_radius*2;
 		  	});
 		};
 		var add_event_to_others_this_period = function (event) {
@@ -258,7 +258,7 @@ function animate_events(events, options, element) {
        .attr("cy",     function (d) {
        	       	           if (inactive_event_types.indexOf(d.color) >= 0) {
        	                   	   return -1000;
-       	                   } 
+       	                   }
 						   if (current_period(d.time) || previous_period(d.time)) {
 							   return d.y;
 						   }
@@ -294,7 +294,7 @@ function animate_events(events, options, element) {
       	  update();
       	  return;
       }
-      if (now <= latest_time && 
+      if (now <= latest_time &&
           now <= end_date) {
     	  setTimeout(tick, 1000/periods_per_second);
       } else {
@@ -393,17 +393,17 @@ function animate_events(events, options, element) {
 	  	  var deselect_all = create_button('Deselect all');
 	  	  var keys = [];
 	  	  var row, td;
-	  	  select_all  .addEventListener('click', 
-	  	                                function () { 
+	  	  select_all  .addEventListener('click',
+	  	                                function () {
 	  	                                	inactive_event_types = [];
 	  	                                	keys.forEach(function (key) {
 	  	                                		key.className = "event-key-active";
 	  	                                	});
 	  	                                	refresh();
-	  	  	                       	        update(); 
+	  	  	                       	        update();
 	  	  	                       	    });
 	  	  deselect_all.addEventListener('click',
-	  	                                function () { 
+	  	                                function () {
 	  	                                	inactive_event_types = legend_data.map(function (entry) {
 	  	                                	                                           return entry.color;
 	  	                                										   });
@@ -411,7 +411,7 @@ function animate_events(events, options, element) {
 	  	                                        key.className = "event-key-inactive";
 	  	                                	});
 	  	                                	refresh();
-	  	  	                       	        update(); 
+	  	  	                       	        update();
 	  	  	                       	    });
 	  	  row = document.createElement('tr');
 	  	  td  = document.createElement('td');
@@ -420,7 +420,7 @@ function animate_events(events, options, element) {
 	  	  td  = document.createElement('td');
 	  	  td.appendChild(deselect_all);
 	  	  table.appendChild(row);
-	  	  row.appendChild(td); 	           
+	  	  row.appendChild(td);
 	  	  table.className = "event-legend";
 	  	  legend_data.forEach(function (entry, index) {
 	  	  	  var key         = document.createElement('td');
@@ -459,7 +459,7 @@ function animate_events(events, options, element) {
 	  var date_selectors    = document.createElement('div');
 	  var periods_interface = document.createElement('div');
 	  var unit_selector = function (id) {
-	  	  return '<select class="event-unit-select" id="' + id + '">' + 
+	  	  return '<select class="event-unit-select" id="' + id + '">' +
   	             '<option name="seconds">seconds</option>' +
   	             '<option name="minutes">minutes</option>' +
   	             '<option name="hours">hours</option>' +
@@ -506,8 +506,8 @@ function animate_events(events, options, element) {
   	  space.innerHTML           = '&nbsp;&nbsp;';
   	  space2.innerHTML          = '&nbsp;&nbsp;';
   	  space3.innerHTML          = '&nbsp;&nbsp;';
-  	  period_input.innerHTML    = '<label class="event-number-input" title="View all events that occured within this period of time.">' + 
-  	                              'Period: ' + 
+  	  period_input.innerHTML    = '<label class="event-number-input" title="View all events that occured within this period of time.">' +
+  	                              'Period: ' +
   	                              '<input class="event-number-input" type="number" id="period-input" value="' + period + '">' +
   	                               unit_selector("period-units") +
   	                              '</label>';
@@ -538,12 +538,12 @@ function animate_events(events, options, element) {
   	  video_player.appendChild(time_display);
   	  time_display.className = "event-text";
   	  add_to_view_and_controls(video_player);
-      start_date_input.innerHTML = '<label class="event-date-input" title="View all events that occured this date or after.">' + 
-								   'Start: ' + 
+      start_date_input.innerHTML = '<label class="event-date-input" title="View all events that occured this date or after.">' +
+								   'Start: ' +
 								   '<input class="event-date-input" type="date" id="start-date-input" value="' + formatDateInput(new Date(earliest_day)) + '">' +
 								   '</label>';
-      end_date_input.innerHTML   = '<label class="event-date-input" title="View all events that occured this date or before.">' + 
-								   'End: ' + 
+      end_date_input.innerHTML   = '<label class="event-date-input" title="View all events that occured this date or before.">' +
+								   'End: ' +
 								   '<input class="event-date-input" type="date" id="end-date-input" value="'   + formatDateInput(new Date(latest_day)) + '">' +
 								   '</label>';
    	  start_date_input.addEventListener('change',
@@ -593,7 +593,7 @@ function animate_events(events, options, element) {
                                                              }
                                                          });
                                       });
-  
+
     var scale_to_fit = function (interface_width, interface_height) {
                          var scale = Math.min(interface_width  / entire_interface.clientWidth, interface_height / entire_interface.clientHeight);
                          entire_interface.style.transform = "scale("+ scale + "," + scale + ")";
@@ -624,7 +624,7 @@ function animate_events(events, options, element) {
 		   	   event.time = event.time.getTime();
 		   }
 		   if (!earliest_time || event.time < earliest_time) {
-			   earliest_time = event.time;		   	  
+			   earliest_time = event.time;
 		   }
 		   if (!latest_time || event.time > latest_time) {
 			   latest_time = event.time;
@@ -689,8 +689,8 @@ function animate_events(events, options, element) {
 
     nodes
 		.append("title")
-		  .text(function (d) { 
-					return d.title; 
+		  .text(function (d) {
+					return d.title;
 				});
 
 	// if places don't have x,y coordinates then place them in a circle?
@@ -711,11 +711,11 @@ function animate_events(events, options, element) {
           	                 return d.y;
                          })
            .append("title")
-			  .text(function (d) { 
-						return d.title; 
+			  .text(function (d) {
+						return d.title;
 					});
 
-    svg.selectAll("circle").sort(function (a, b) { 
+    svg.selectAll("circle").sort(function (a, b) {
         if (a.place_id !== undefined) return 1;  // only events have place_ids so send it to front so title tooltip works
         return -1;
     });
