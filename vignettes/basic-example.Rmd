@@ -63,6 +63,8 @@ places = data.frame(
 # Make Emre's data good
 
 ```{r}
+library(readr)
+library(dplyr)
 emre_data <- read.csv("http://users.ox.ac.uk/~oucs0030/temp/FOQMRuVAifoTmfWMDgsz6a.csv", stringsAsFactors = F)
 ```
 

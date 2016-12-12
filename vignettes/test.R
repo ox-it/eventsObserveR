@@ -24,7 +24,6 @@ emre_data <- emre_data %>%
 emre_data <- emre_data %>%
   mutate(radius = rep(5, nrow(emre_data)))
 
-htmlwidgets::HTMLWidgets.dataframeToD3(emre_data)
 
 emre_data <- emre_data %>%
   mutate(time = as.integer(time) * 1000)
@@ -66,6 +65,13 @@ for(i in 1:nrow(emre_data)){
 
   title <- append(title, this_title)
 }
+
+my_rows <- lapply(1:nrow(emre_data), function(x)emre_data[x,] %>% as.list())
+
+i_row <- i_row[!is.na(i_row)]
+
+paste0(names(my_rows), ": ", my_rows, collapse = ", ")
+
 ## Add titles into emre_data
 emre_data$title <- title
 
@@ -75,7 +81,7 @@ emre_data$title <- title
 
 eventsObserveR(events = emre_data, place.key = "station",
                legend = legend.df,
-               # legend.columns = 2,
+               legend.columns = 2,
                size = list(
                  view.width = 600,
                  view.height = 600,
