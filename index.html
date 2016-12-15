@@ -22,12 +22,15 @@ var station_positions = [];
 var parseTime  = d3.timeParse("%d-%b-%y %H:%M:%S");
 var formatTime = d3.timeFormat("%H:%M:%S %d %b %y");
 
-d3.csv("../../WildCRUData/WildCRU.csv",
-       function (row) {
+var station_locations = [];
+
+var read_data = function (station_locations) {
+	d3.csv("../../WildCRUData/WildCRU.csv",
+	   function (row) {
        	   // this should be performed by R when an HTMLWidget
        	   var species_id = species.indexOf(row["Species"]);
        	   var station = row["Camera ID"].substring(0, row["Camera ID"].indexOf("_Camera"));
-//        	   var station_id = stations.indexOf(station);
+
        	   var time = parseTime(row["Date"] + " " + row["Time"]);
        	   var describe = function (attribute) {
        	   	   if (row[attribute]) {
@@ -41,11 +44,8 @@ d3.csv("../../WildCRUData/WildCRU.csv",
        	   if (species_id < 0) {
 		       species_id = species.push(row["Species"])-1;
 		   }
-// 		   if (station_id < 0) {
-// 		       station_id = stations.push(station)-1;
-// 		   }
-	       return {//place_id:      station_id,
-	               station:       station, // for testing moving place_id functionality to events_observer
+	       return {station:       station,
+	               place_id:      (+station.substring("Station_".length))-1, // -1 to switch to zero indexing
 				   event_type_id: species_id,
 				   time:          time,
 				   radius:        5*Math.sqrt(row["No. Individuals"]),
@@ -60,8 +60,6 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	   	   var animal_observations = [];
 	   	   var legend = [];
 	   	   var max_event_type_id = 0;
-	   	   var width  = 600;
-	       var height = 600;
 	       var color = d3.scaleSequential(d3.interpolateRainbow);
 	   	   if (error) throw error;
 	       data.forEach(function(event) {
@@ -80,18 +78,36 @@ d3.csv("../../WildCRUData/WildCRU.csv",
 	       												return {color: color(id/max_event_type_id),
 	       												        description: species[id]};
 	       });
-	       animate_events(animal_observations, {place_key:                "station",
-	                                            view_width:               width, 
-	                                            view_height:              height,
-	                                            legend:                   legend,
-	                                            legend_columns:              2,
-	                                            width:                    1200,
-	                                            height:                    900,
-	                                            period:                     1,
-	                                            period_units:             "days",
-	                                            previous_period_duration:   1,
-	                                            previous_period_units:    "days",
-	                                            periods_per_second:         24});
+	       animate_events(animal_observations, {place_key:                        "station",
+	                                            places:                   station_locations,
+	                                            view_width:                            1040,
+	                                            horizontal_margin:                      100,
+	                                            view_height:                            720,
+	                                            vertical_margin:                        100,
+	                                            legend:                              legend,
+	                                            legend_columns:                           2,
+	                                            width:                                 1200,
+	                                            height:                                 900,
+	                                            period:                                   1,
+	                                            period_units:                        "days",
+	                                            previous_period_duration:                 1,
+	                                            previous_period_units:               "days",
+	                                            periods_per_second:                     24});
+	   });
+};
+
+d3.csv("../../WildCRUData/Locations.csv",
+       function (row) {
+       	   var index = (+row["station no"])-1; // zero indexing
+       	   station_locations[index] = {x:      +row["x coordinate"],
+       	                               y:      +row["y coordinate"],
+       	                               id:                    index,
+       	                               color:       'lavenderblush',
+       	                               radius:                   10,
+       	                               title: "Station " + (index+1)};
+       },
+	   function(error, data) {
+	   	   read_data(station_locations);
 	   });
 
 }());

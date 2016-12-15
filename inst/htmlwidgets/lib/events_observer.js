@@ -28,7 +28,9 @@ function animate_events(events, options, element) {
 	// and optionally
 	//   radius, color, title, and any other fields
 	// options include:
-	//   places (an array of objects with ... )
+	//   places (an array of objects with properties x, y, id, color, radius
+	//           where x and y are pixel coordinates (transformed to fit the viewing area) and
+	//           id matches the place_id of events)
 	//   place_key (a string corresponding to a field in the events -- )
 	//   view_width and view_height which specify the size of the visualisation area in pixels
 	//   interface_width and interface_height which specify the size of the entire interface (including controls and legends) in pixels
@@ -64,24 +66,14 @@ function animate_events(events, options, element) {
 	var formatDateInput   = d3.timeFormat("%Y-%m-%d");
 	var inactive_event_types = [];
 
-	var compute_places = function () {
+	var process_places = function () {
 		var place_names = [];
 		var place_key = options.place_key || "place";
-		var places;
-		events.forEach(function (event) {
-			if (event[place_key] && place_names.indexOf(event[place_key]) < 0) {
-				place_names.push(event[place_key]);
-			}
-		});
-		if (place_names.length === 0) {
-			alert("Error: either places or a place_key used in the events needs to be provided.");
-			return;
-		};
-		places = place_names.map(function (place_name, index) {
+		var horizontal_margin = options.horizontal_margin || 100;
+	    var vertical_margin   = options.vertical_margin   || 100;
+		var compute_place = function (place_name, index) {
 	       var theta = 2 * Math.PI / place_names.length;
 	       var rotation = -Math.PI / 2; // so the first place is at 12 o'clock
-	       var horizontal_margin  = options.horizontal_margin || 100;
-	       var vertical_margin    = options.vertical_margin   || 100;
 	       var place_color        = options.place_color       || 'lavenderblush';
 	       var ellipse_width      = view_width /2-horizontal_margin;
 	       var ellipse_height     = (view_height/2-vertical_margin);
@@ -93,11 +85,50 @@ function animate_events(events, options, element) {
 		           color:  place_color,
 		           id:     index,
 		           title:  place_name};
-	       });
-	    events.forEach(function (event) {
-			event.place_id = place_names.indexOf(event[place_key]);
-	    });
-	    return places;
+	    };
+	    var max_place_x = 0;
+	    var max_place_y = 0;
+	    var x_factor, y_factor;
+		events.forEach(function (event) {
+			if (event[place_key] && place_names.indexOf(event[place_key]) < 0) {
+				place_names.push(event[place_key]);
+			}
+		});
+		if (place_names.length === 0) {
+			alert("Error: a place_key used in the events needs to be provided unless the key is 'place' in the event data.");
+			return;
+		};
+		if (places === undefined) {
+			places = place_names.map(compute_place);
+			events.forEach(function (event) {
+				event.place_id = place_names.indexOf(event[place_key]);
+			});
+		} else {
+			places.forEach(function (place) {
+				if (place.x > max_place_x) {
+					max_place_x = place.x;
+				}
+				if (place.y > max_place_y) {
+					max_place_y = place.y;
+				}
+			})
+			x_factor = (view_width -2*horizontal_margin)/max_place_x;
+			y_factor = (view_height-2*vertical_margin)  /max_place_y;
+			for (i = 0; i < places.length; i++) {
+				if (places[i]) {
+					places[i].x = horizontal_margin+(places[i].x*x_factor);
+					// view_height is here because in the browser increasing y is downward
+					places[i].y = -vertical_margin+view_height-(places[i].y*y_factor);
+				} else {
+					// missing places still need entries even though they'll never be seen
+					places[i] = {x: 0,
+								 y: 0,
+								 radius: 0,
+								 color: "white",
+								 id: i};
+				}
+			};
+		}
 	};
 
 	var coordinates_from_place = function () {
@@ -608,15 +639,13 @@ function animate_events(events, options, element) {
 
     var nodes, svg, earliest_time, latest_time, earliest_day, latest_day, start_date, end_date;
 
-	if (!places) {
-		if (options.place_key) {
-			// places should be generated from values of place_key of events
-			places = compute_places();
-		} else {
-			// report error
-			alert("The event observer needs either the places or a key (column name) of where the event took place.");
-		}
-	}
+// 	if (!places && !options.place_key) {
+// 		// report error
+//         alert("The event observer needs either the places or a key (column name) of where the event took place.");
+// 	}
+
+	process_places();
+
 	coordinates_from_place();
 
 	events.forEach(function (event) {
@@ -693,7 +722,6 @@ function animate_events(events, options, element) {
 					return d.title;
 				});
 
-	// if places don't have x,y coordinates then place them in a circle?
 	// add places
     nodes.select("g")
        .data(places)
