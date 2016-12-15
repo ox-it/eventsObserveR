@@ -59,7 +59,7 @@ function animate_events(events, options, element) {
 	var periods_per_second       = options.periods_per_second            ||   24;
 	var period                   = options.period                        || 24*60*60; // in seconds
 	var legend_columns           = options.legend_columns                ||    2;
-	var previous_period_duration = options.previous_period_duration === undefined ? period : options.previous_period_duration;
+	var previous_period_duration = typeof options.previous_period_duration === 'number' ? options.previous_period_duration : period;
 
 	var paused            = true;
 	var play_direction    = 1; // forward one period
@@ -98,12 +98,7 @@ function animate_events(events, options, element) {
 			alert("Error: a place_key used in the events needs to be provided unless the key is 'place' in the event data.");
 			return;
 		};
-		if (places === undefined) {
-			places = place_names.map(compute_place);
-			events.forEach(function (event) {
-				event.place_id = place_names.indexOf(event[place_key]);
-			});
-		} else {
+		if (places) {
 			places.forEach(function (place) {
 				if (place.x > max_place_x) {
 					max_place_x = place.x;
@@ -111,7 +106,7 @@ function animate_events(events, options, element) {
 				if (place.y > max_place_y) {
 					max_place_y = place.y;
 				}
-			})
+			});
 			x_factor = (view_width -2*horizontal_margin)/max_place_x;
 			y_factor = (view_height-2*vertical_margin)  /max_place_y;
 			for (i = 0; i < places.length; i++) {
@@ -128,19 +123,24 @@ function animate_events(events, options, element) {
 								 id: i};
 				}
 			};
+		} else {
+		    places = place_names.map(compute_place);
+			events.forEach(function (event) {
+				event.place_id = place_names.indexOf(event[place_key]);
+			});
 		}
 	};
 
 	var coordinates_from_place = function () {
 		events.forEach(function (event) {
 			var place = places[event.place_id];
-			if (event.x === undefined) {
+			if (typeof event.x !== 'number') {
 				// true_x is where the event's place is located
 				event.true_x = place.x;
 				// x is where it should be displayed
 				event.x      = place.x;
 			}
-			if (event.y === undefined) {
+			if (typeof event.y !== 'number') {
 				event.true_y = place.y;
 				event.y = place.y;
 			}
@@ -744,7 +744,7 @@ function animate_events(events, options, element) {
 					});
 
     svg.selectAll("circle").sort(function (a, b) {
-        if (a.place_id !== undefined) return 1;  // only events have place_ids so send it to front so title tooltip works
+        if (typeof a.place_id === 'number') return 1;  // only events have place_ids so send it to front so title tooltip works
         return -1;
     });
 
