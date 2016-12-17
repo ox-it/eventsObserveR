@@ -467,8 +467,12 @@ function animate_events(events, options, element) {
 	  	  	      row = document.createElement('tr');
 	  	  	      table.appendChild(row);
 	  	  	  }
-	  	  	  key.innerHTML = '<i class="fa fa-circle" aria-hidden="true"></i>';
-	  	  	  key.style.color = entry.color;
+	  	  	  if (entry.shape) {
+				  key.innerHTML = '<img src="' + entry.shape + '" width=16 height=16></img>';
+	  	  	  } else {
+				  key.innerHTML = '<i class="fa fa-circle" aria-hidden="true"></i>';
+				  key.style.color = entry.color;
+	  	  	  }
 	  	  	  key.className = "event-key-active";
 	  	  	  key.addEventListener('click',
 	  	  	                       function () {
