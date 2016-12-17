@@ -65,6 +65,7 @@ function animate_events(events, options, element) {
 	var play_direction    = 1; // forward one period
 	var formatDateInput   = d3.timeFormat("%Y-%m-%d");
 	var inactive_event_types = [];
+	var shape_type;
 
 	var process_places = function () {
 		var place_names = [];
@@ -74,7 +75,7 @@ function animate_events(events, options, element) {
 		var compute_place = function (place_name, index) {
 	       var theta = 2 * Math.PI / place_names.length;
 	       var rotation = -Math.PI / 2; // so the first place is at 12 o'clock
-	       var place_color        = options.place_color       || 'lavenderblush';
+	       var place_color        = options.place_color       || 'pink';
 	       var ellipse_width      = view_width /2-horizontal_margin;
 	       var ellipse_height     = (view_height/2-vertical_margin);
 	       var ellipse_circumference = 2 * Math.PI * Math.sqrt((ellipse_width * ellipse_width + ellipse_height * ellipse_height) / 2);
@@ -226,7 +227,7 @@ function animate_events(events, options, element) {
 		  	var arc_length = 0;
 		    var event_radius = options.event_radius || 5;
 		  	events_at_same_place.forEach(function (event) {
-		  	    circumference += event_radius*2;
+		  	    circumference += (event.radius || event_radius)*2;
 		  	});
 		  	radius = circumference / (2 * Math.PI);
 		  	events_at_same_place.forEach(function (event) {
@@ -234,7 +235,7 @@ function animate_events(events, options, element) {
 		  	    var angle = (arc_length+(event.radius || event_radius)) * 2 * Math.PI / circumference;
 		  	  	event.x = event.true_x + radius * Math.cos(angle);
 		  	    event.y = event.true_y + radius * Math.sin(angle);
-		  	  	arc_length += event_radius*2;
+		  	  	arc_length += (event.radius || event_radius)*2;
 		  	});
 		};
 		var add_event_to_others_this_period = function (event) {
@@ -274,43 +275,49 @@ function animate_events(events, options, element) {
     var update = function () {
   	  // move current_period's and previous_period's event sightings into view and move others out
   	  var date = new Date(now);
+  	  var coordinate = function (d, x_or_y) {
+  	  	  // should replace d.color with d.event_type_id after updating inactive_event_types
+  	  	  if (inactive_event_types.indexOf(d.color) >= 0) {
+       	      return -1000;
+       	  }
+		  if (current_period(d.time) || previous_period(d.time)) {
+			  return d[x_or_y];
+		  }
+		  return -1000; // offscreen
+  	  };
 	  // if integer number of days then just display the date otherwise the date and time
 	  d3.select(time_display).text(period >= 24*60*60 && period%(24*60*60) === 0 ? date.toLocaleDateString() : date.toLocaleString());
-	  nodes
-       .attr("cx",     function (d) {
-       	                   if (inactive_event_types.indexOf(d.color) >= 0) {
-       	                   	   return -1000;
-       	                   }
-						   if (current_period(d.time) || previous_period(d.time)) {
-							   return d.x;
-						   }
-						   return -1000; // offscreen
-					   })
-       .attr("cy",     function (d) {
-       	       	           if (inactive_event_types.indexOf(d.color) >= 0) {
-       	                   	   return -1000;
-       	                   }
-						   if (current_period(d.time) || previous_period(d.time)) {
-							   return d.y;
-						   }
-						   return -1000; // offscreen
-					   })
-	    // current_period's are solid coloured circles with a white border and yesterday's are white with a coloured border
-       .attr("fill",   function (d) {
-						   if (previous_period(d.time)) {
-							   return 'white';
-						   }
-						   return d.color;
-					   })
-	   .attr("stroke", function (d) {
-						   if (previous_period(d.time)) {
-							   return d.color;
-						   }
-						   return 'white';
-					   })
-	   .attr("r",     function (d) {
-      	                  return d.radius;
-                      });
+      if (shape_type === 'circle') {
+      	  nodes
+      	    .attr("cx",     function (d) { return coordinate(d, 'x') })
+            .attr("cy",     function (d) { return coordinate(d, 'y') })
+      	    .attr("fill",   function (d) {
+							    if (previous_period(d.time)) {
+								    return 'white';
+							    }
+							    return d.color;
+						    })
+	        .attr("stroke", function (d) {
+							    if (previous_period(d.time)) {
+								    return d.color;
+							    }
+							    return 'white';
+						    })
+						    	    // current_period's are solid coloured circles with a white border and yesterday's are white with a coloured border
+	       .attr("r",     function (d) {
+							  return d.radius;
+						  });
+      } else {
+      	 nodes
+      	   .attr("x",       function (d) { return coordinate(d, 'x')-d.radius })
+           .attr("y",       function (d) { return coordinate(d, 'y')-d.radius })
+      	   .attr("opacity", function (d) {
+							    if (previous_period(d.time)) {
+								    return .25;
+							    }
+							    return 1;
+						    });
+      }
     };
 
     var tick = function() {
@@ -631,6 +638,33 @@ function animate_events(events, options, element) {
                          entire_interface.style["transform-origin"] = "0 0";
     };
 
+    var add_places = function () {
+		svg.append("g")
+			.attr("class", "place")
+			.selectAll("rect")
+		   .data(places)
+		   .enter().append("rect")
+			   .attr("width",    function (d) {
+								 return 2*d.radius;
+							 })
+				.attr("height",    function (d) {
+								 return 2*d.radius;
+							 })
+			   .attr("fill", function (d) {
+								 return d.color;
+							 })
+			   .attr("x",   function (d) {
+								 return d.x-d.radius;
+							 })
+			   .attr("y",   function (d) {
+								 return d.y-d.radius;
+							 })
+			   .append("title")
+				  .text(function (d) {
+							return d.title;
+						});
+	};
+
     var entire_interface = document.createElement('div');
 
     var time_display     = document.createElement('span');
@@ -638,11 +672,6 @@ function animate_events(events, options, element) {
     var svg_element      = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
     var nodes, svg, earliest_time, latest_time, earliest_day, latest_day, start_date, end_date;
-
-// 	if (!places && !options.place_key) {
-// 		// report error
-//         alert("The event observer needs either the places or a key (column name) of where the event took place.");
-// 	}
 
 	process_places();
 
@@ -694,11 +723,29 @@ function animate_events(events, options, element) {
 				  .attr("width",  view_width)
 				  .attr("height", view_height);
 
-	  refresh();
+	refresh();
+
+    add_places();
 
     // add nodes for each event
-    nodes = svg
-		 .append("g")
+    if (events[0].shape) {
+       shape_type = 'image';
+   	   nodes = svg.append("g")
+		  .attr("class", "event")
+        .selectAll(shape_type)
+		.data(events)
+		.enter().append(shape_type)
+ 	      .attr("xlink:href", function (d) { return d.shape })
+		  .attr("x",  function(d){ return d.x })
+		  .attr("y",  function(d){ return d.y })
+		  .attr("width",  function(d){ return 2*d.radius })
+		  .attr("height", function(d){ return 2*d.radius })
+		  .attr("fill", function (d) {
+						  return d.color  || options.event_color || 'red';
+					    });
+    } else {
+       shape_type = 'circle';
+   	   nodes = svg.select("g")
 		  .attr("class", "event")
 		.selectAll("circle")
 		.data(events)
@@ -715,38 +762,13 @@ function animate_events(events, options, element) {
 		.attr("cy", function (d) {
 						return d.y;
 					 });
+	}
 
-    nodes
+	nodes
 		.append("title")
 		  .text(function (d) {
 					return d.title;
 				});
-
-	// add places
-    nodes.select("g")
-       .data(places)
-       .enter().append("circle")
-           .attr("r",    function (d) {
-      	                     return d.radius;
-                         })
-           .attr("fill", function (d) {
-      	                     return d.color;
-                         })
-           .attr("cx",   function (d) {
-          	                 return d.x;
-                         })
-           .attr("cy",   function (d) {
-          	                 return d.y;
-                         })
-           .append("title")
-			  .text(function (d) {
-						return d.title;
-					});
-
-    svg.selectAll("circle").sort(function (a, b) {
-        if (typeof a.place_id === 'number') return 1;  // only events have place_ids so send it to front so title tooltip works
-        return -1;
-    });
 
     setTimeout(update); // delay until units and periods have settled down
 

@@ -38,6 +38,13 @@ var read_data = function (station_locations) {
        	   	   }
        	   	   return "";
        	   };
+       	   var random_shape = function () {
+       	   	   if (Math.random() < .5) {
+       	   	   	  return "https://upload.wikimedia.org/wikipedia/commons/8/83/Pink_Venus_symbol.svg";
+       	   	   } else {
+				  return "https://upload.wikimedia.org/wikipedia/en/c/c7/Scales_Of_Justice.svg";
+       	   	   }
+       	   }
        	   if (ignore_species.indexOf(row["Species"]) >= 0) {
        	   	   return;
        	   }
@@ -49,7 +56,9 @@ var read_data = function (station_locations) {
 				   event_type_id: species_id,
 				   time:          time,
 				   radius:        5*Math.sqrt(row["No. Individuals"]),
-				   title:         row["No. Individuals"] + " " + row["Species"] + " by " + row["Camera ID"] + " at " + formatTime(time) +
+//                 radius:        12,
+// 				   shape:         random_shape(),
+				   title:         row["No. Individuals"] + " " + row["Species"] + " by " + row["Camera ID"] + " at " + new Date(time).toLocaleString() +
 									  describe("No. males") +
 									  describe("No. females") +
 									  describe("No. unknown") +
@@ -84,10 +93,11 @@ var read_data = function (station_locations) {
 	                                            horizontal_margin:                      100,
 	                                            view_height:                            720,
 	                                            vertical_margin:                        100,
-	                                            legend:                              legend,
-	                                            legend_columns:                           2,
 	                                            width:                                 1200,
 	                                            height:                                 900,
+// 	                                            event_radius:                            16,
+	                                            legend:                              legend,
+	                                            legend_columns:                           2,
 	                                            period:                                   1,
 	                                            period_units:                        "days",
 	                                            previous_period_duration:                 1,
@@ -102,7 +112,7 @@ d3.csv("../../WildCRUData/Locations.csv",
        	   station_locations[index] = {x:      +row["x coordinate"],
        	                               y:      +row["y coordinate"],
        	                               id:                    index,
-       	                               color:       'lavenderblush',
+       	                               color:                'pink',
        	                               radius:                   10,
        	                               title: "Station " + (index+1)};
        },
