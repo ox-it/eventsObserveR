@@ -11,126 +11,48 @@ vignette: >
 
 <!-- ANY PACKAGES USED HERE MUST BE LOADED IN THE DESCRIPTION FILE AS WELL !-->
 
-While developing, cheat and use this to reload
-
 ```{r}
-devtools::install()
 library(eventsObserveR)
-```
-
-# Design data structure
-
-## Events
-
-This is the R version of the events data
-
-```{r}
-events <- data.frame(
-  color = rep('rgba(0, 0, 0, .05)',5),
-  place_id = 0:4, 
-  x = seq(100, 500, 100),
-  y = seq(100, 500, 100),
-  event_type_id = 1:5
-  time = 1e6 * 1:5,
-  radius = 5,
-  stringsAsFactors = F
-)
-
-
-legend.data <- data.frame(
-  color = ,
-  description = ,
-  species = c("lion", "giraffe")
-)
-
-```
-
-Within the htmlwidget we convert this into JSON that D3 will like using `HTMLWidgets.dataframeToD3`
-
-## Places
-
-```{r}
-places = data.frame(
-  id = 0:4,
-  x = seq(100, 500, 100),
-  y = seq(100, 500, 100),
-  radius = rep(10,5),
-  color = rep('rgba(0, 0, 0, .05)',5)
-)
-
-```
-
-# Make Emre's data good
-
-```{r}
-library(readr)
 library(dplyr)
-emre_data <- read.csv("http://users.ox.ac.uk/~oucs0030/temp/FOQMRuVAifoTmfWMDgsz6a.csv", stringsAsFactors = F)
+head(sample_events_data)
 ```
 
 ```{r}
-emre_data %>%
-  select()
+head(sample_locations_data)
 ```
 
 
-# Run Code
-
 ```{r}
-eventsObserveR(events = emre_data
-              # places = places,
-              # period = 1000
-              )
-```
-
-```{r}
-eventsObserveR(events = events,
-              places = places,
-              period = 1000,
-              width = 600,
-              height = 600) %>%
-  eventsLegend(columns = 2)
-
-eventsObserveR(events = events,
-              places = places,
-              period = 1000,
-              width = 600,
-              height = 600) %>%
-  eventsLegend(legend.data = df,
-               columns -1 )
-```
 
 
-# Shiny
+# sample_events_data <- sample_events_data %>%
+#   select(-radius)
 
-```{r}
-library(shiny)
-shinyApp(
-  ui = fluidPage(
-    sidebarLayout(
-      sidebarPanel(
-        sliderInput("n","n",min = 1000, max = 5000, value = 2000 )
-      ),
-    mainPanel(
-    eventsObserverOutput("events")
-    ))
-  ),
-  server = function(input, output){
-    output$events <- renderEventsObserver({
-      print(input$n)
-      eventsObserveR(events = events,
-              places = places,
-              period = input$n,
-              width = 600,
-              height = 600)
-    }
-    )
-  }
+small_events_data <- sample_events_data[1:10,]
+legend.df <- small_events_data %>%
+  select(species, color) %>%
+  rename(description = species) %>%
+  unique()
+
+small_events_data <- small_events_data %>%
+  rename(foobar = species) %>%
+  mutate(new = rep(1, nrow(small_events_data)))
+
+new.legend.df <- data.frame(
+  description = c("spider","eagle owl"),
+  color = c("red", "blue")
 )
+
+eventsObserveR(events = small_events_data, 
+               place.key = "station",
+               places = sample_locations_data,
+               legend = new.legend.df,
+               legend.columns = 2,
+               # event.radius = 10,
+               size = list(
+                 view.width = 1040,
+                 view.height = 720,
+                 interface.width = 1200, 
+                 interface.height = 900))
 ```
-
-
-
-
-
 
