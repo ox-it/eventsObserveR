@@ -66,7 +66,7 @@ function animate_events(events, options, element) {
 	var play_direction    = 1; // forward one period
 	var formatDateInput   = d3.timeFormat("%Y-%m-%d");
 	var inactive_event_types = [];
-	var shape_type;
+	var shape_type               = options.shape_type                    || "circle";
 
 	var process_places = function () {
 		var place_names = [];
