@@ -2,19 +2,23 @@
 #' 
 #' \code{eventsObserveR} creates an playable visualisation of the distribution of event observations over a range of defined places within a variable time period.
 #' 
-#' @param events A data.frame with events, needs at least place.key, time
+#' @param events A data.frame with events, needs at least place.key, time and place_id
 #' \itemize{
-#'  \item{"place"}{ : unique "place" id, does not need to be numeric}
-#'  \item{"time"}{ : integer time of event, cannot be as.POSIXct}
-#'  \item{"title"}{ : tooltip of the event}
-#'  \item{...}{}
+#'   \item{place.key}{place.key, unique identifier for each observation used which must be set as place.key.}
+#'   \item{time}{time, when the event was observed, in as.POSIXct format.}
+#'   \item{radius}{radius, size of event when displayed.}
+#'   \item{color}{color, color for the event}
+#'   \item{place_id}{placed_id, id of the location (place) where the event was observed. Must be given if `places` is not NULL.}
 #'  }
+#'  
 #' @param places An optional data.frame for place locations, if NULL places will be set to fill outline a circle that fills the available space. Default to NULL
 #' \itemize{
-#'  \item{"place"}{ : unique "place" id, does not need to be numeric}
-#'  \item{"time"}{ : integer time of event, cannot be as.POSIXct}
-#'  \item{"title"}{ : tooltip of the event}
-#'  \item{...}{}
+#'   \item{id}{id, Unique id for each location, ranging from 0 - 98. Note that these ids correspond to the `place_id` in `sample_events_data`}
+#'   \item{x}{x, x coordinate of each locations}
+#'   \item{y}{y, y coordinate of each locations}
+#'   \item{color}{color, color of each location}
+#'   \item{radius}{radius, radiues of each location}
+#'   \item{title}{title, tooltip text displayed when hovering over the location}
 #'  }
 #' @param place.key Name of column containing place.key in the events data.frame (defaults to place).
 #' @param periodsPerSecond Equivalent to number of "frames per second when playing" the eventsObserver animation. Default 24.
@@ -27,6 +31,15 @@
 #'  \item{"title"}{ : tooltip of the event}
 #'  \item{...}{}
 #'  }
+#' @param place.radius Radius for circles representing locations for events, used only if `places` is not NULL. 
+#' Otherwise the radius column in `places` is used.
+#' @param event.radius Radius for events, default to 5. Only used if a column called "radius" in `events` is not given.
+#' @param place.color Color for places, default to "lavenderblush". Only used if a column called "color" in `places` is not given.
+#' @legend An optional data.frame for legend labelling events by type. Default to NULL
+#' \itemize{
+#'     \item{"description"}{ : unique "place" id, does not need to be numeric}
+#'     \item{"color"}{ : }
+#' }
 #'  
 #' @import htmlwidgets
 #' @export
@@ -34,8 +47,10 @@ eventsObserveR <- function(events,
                           places = NULL, 
                           place.key = "place",
                           periodsPerSecond = 24,
-                          period = 86400,
-                          previousPeriodDuration = 86400,
+                          period = 1,
+                          previousPeriodDuration = 1,
+                          period.unit = "days",
+                          previous.period.unit = "days",
                           size = list(
                             view.width = 600,
                             view.height = 600,
@@ -50,12 +65,19 @@ eventsObserveR <- function(events,
                           event.color = "red",
                           legend = NULL,
                           legend.columns = 1) {
+  # coerce the times into milliseconds
+  # TODO: Apply logic more sensibly and provide errors
+  events$time <- as.integer(events$time) * 1000
+  
+  # mutate(time = as.integer(time) * 1000)
   
   # create a list that contains the settings
   settings <- list(
     periods_per_second = periodsPerSecond,
     period = period,
     previous_period_duration = previousPeriodDuration,
+    period_unit = period.unit,
+    previous_period_unit = previous.period.unit,
     places = places,
     place_key = place.key,
     view_width = size$view.width,
@@ -97,7 +119,7 @@ eventsLegend <- function(eventsObserver = eO,
                          legend.data = NULL,
                          columns = 1){
   # Add the legend to the eventsObserver
-  
+
   if(is.null(legend.data)){
     "kens_auto_legend"
   } else {
