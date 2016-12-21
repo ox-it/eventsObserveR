@@ -67,8 +67,7 @@ function animate_events(events, options, element) {
 	var play_direction    = 1; // forward one period
 	var formatDateInput   = d3.timeFormat("%Y-%m-%d"); // the date format for the initial beginning and end dates
 	var inactive_event_types = [];
-	var shape_type; // can be either 'circle' or 'image'
-
+	var shape_type               = options.shape_type                    || "circle"; // can be either 'circle' or 'image'
 	var process_places = function () {
 		// if places aren't defined generates them in the largest elipse that fits the viewing area
 		// otherwise scales the place coordinates given to fit the viewing area

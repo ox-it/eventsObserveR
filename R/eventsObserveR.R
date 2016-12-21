@@ -23,7 +23,9 @@
 #' @param place.key Name of column containing place.key in the events data.frame (defaults to place).
 #' @param periodsPerSecond Equivalent to number of "frames per second when playing" the eventsObserver animation. Default 24.
 #' @param period Period within which events must occur to be displayed as filled dots. Default to 86400 seconds.
+#' @param period.unit Unit (seconds, hours, days) used to calculate the length of the `period`. Default to "days".
 #' @param previousPeriodDuration Period within which events occuring prior to "period" will be included in the visualisation and displayed as empty dots. Default to 86400 seconds.
+#' @param previous.period.unit Unit (seconds, hours, days) used to calculate the length of the `previous.period`. Default to "days".
 #' @param size Optional list of named arguments:
 #' \itemize{
 #'  \item{"place"}{ : unique "place" id, does not need to be numeric}
@@ -31,15 +33,17 @@
 #'  \item{"title"}{ : tooltip of the event}
 #'  \item{...}{}
 #'  }
-#' @param place.radius Radius for circles representing locations for events, used only if `places` is not NULL. 
-#' Otherwise the radius column in `places` is used.
+#' @param place.radius Radius for circles representing locations for events, used only if `places` is not NULL. Otherwise the radius column in `places` is used.
+#' @param shape.type Type of shape to use for events, defaults to "circle". Can be path to svg images.
 #' @param event.radius Radius for events, default to 5. Only used if a column called "radius" in `events` is not given.
+#' @param event.color Color of events, only used if a column called "color" is not given in `events`. Default is "red".
 #' @param place.color Color for places, default to "lavenderblush". Only used if a column called "color" in `places` is not given.
-#' @legend An optional data.frame for legend labelling events by type. Default to NULL
+#' @param legend An optional data.frame for legend labelling events by type. Default to NULL
 #' \itemize{
 #'     \item{"description"}{ : unique "place" id, does not need to be numeric}
 #'     \item{"color"}{ : }
 #' }
+#' @param legend.columns How many columns should the legened entries be split across. Default to 1
 #'  
 #' @import htmlwidgets
 #' @export
@@ -60,6 +64,7 @@ eventsObserveR <- function(events,
                             vertical.margin = 100
                           ),
                           place.radius = NULL,
+                          shape.type = "circle",
                           event.radius = 5,
                           place.color = "lavenderblush",
                           event.color = "red",
@@ -68,7 +73,7 @@ eventsObserveR <- function(events,
   # coerce the times into milliseconds
   # TODO: Apply logic more sensibly and provide errors
   events$time <- as.integer(events$time) * 1000
-  
+
   # mutate(time = as.integer(time) * 1000)
   
   # create a list that contains the settings
@@ -87,6 +92,7 @@ eventsObserveR <- function(events,
     horizontal_margin = size$horizontal.margin,
     vertical_margin = size$vertical.margin,
     place_radius = place.radius,
+    shape_type = shape.type,
     event_radius = event.radius,
     place_color = place.color,
     event_color = event.color,
@@ -114,23 +120,26 @@ eventsObserveR <- function(events,
   
 }
 
-#' @export
-eventsLegend <- function(eventsObserver = eO,
-                         legend.data = NULL,
-                         columns = 1){
-  # Add the legend to the eventsObserver
-
-  if(is.null(legend.data)){
-    "kens_auto_legend"
-  } else {
-    "specified_appearance_legend"
-  }
-}
-
+#' eventsObserverOutput
+#' 
+#' Use \code{eventsObserverOutput()} to create a UI element, and \code{renderEventsObserver()} to render the eventsObserveR widget.
+#' 
+#' @param outputId output variable to read from
+#' @param width width of eventsObserveR
+#' @param height height of eventsObserveR
 #' @export
 eventsObserverOutput <- function(outputId, width = "100%", height = "400px") {
   shinyWidgetOutput(outputId, "eventsObserveR", width, height, package = "eventsObserveR")
 }
+
+#' renderEventsObserver
+#' 
+#' Use \code{eventsObserverOutput()} to create a UI element, and \code{renderEventsObserver()} to render the eventsObserveR widget.
+#' 
+#' @param expr Call to eventsObserveR that generates a eventsObserveR class object that can be rendered client-side using eventsObserveROutput
+#' @param env The environment in which to evaluate expr.
+#' @param quoted Is expr a quoted expression (with quote())? This is useful if you want to save an expression in a variable.
+#' 
 #' @export
 renderEventsObserver <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
