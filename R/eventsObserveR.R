@@ -73,7 +73,7 @@ eventsObserveR <- function(events,
   # coerce the times into milliseconds
   # TODO: Apply logic more sensibly and provide errors
   events$time <- as.integer(events$time) * 1000
-  
+
   # mutate(time = as.integer(time) * 1000)
   
   # create a list that contains the settings
