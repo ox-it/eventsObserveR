@@ -44,6 +44,7 @@ function animate_events(events, options, element) {
 	//   event_radius radius of events if not explicitly provided
 	//   legend an array of objects with event_type_ids, description and either shape or color properties
 	//   legend_columns the number of columns to display the legend
+	//   background_image a URL (relative or absolute) to an image (PNG, JPG, ...) that will be displayed as background to the viewing area
 
 	if (!options) {
 		options = {};
@@ -59,10 +60,11 @@ function animate_events(events, options, element) {
 	var interface_height         = options.height                        ||      786;
 	var periods_per_second       = options.periods_per_second            ||       24;
 	var period                   = options.period                        || 24*60*60; // in seconds
-	var legend_columns           = options.legend_columns                ||        2;
+	// if previous period duration not given then assume it is the same as the current period duration
 	var previous_period_duration = typeof options.previous_period_duration === 'number' ? options.previous_period_duration : period;
-	var previous_period_units    = options.previous_period_units         || "days";
-	var period_units             = options.period_units                  || "days";
+	var previous_period_units    = options.previous_period_units         ||   "days";
+	var period_units             = options.period_units                  ||   "days";
+	var legend_columns           = options.legend_columns                ||        2;
 	var paused            = true;
 	var play_direction    = 1; // forward one period
 	var formatDateInput   = d3.timeFormat("%Y-%m-%d"); // the date format for the initial beginning and end dates
@@ -684,9 +686,16 @@ function animate_events(events, options, element) {
 
     var add_places = function () {
     	// add the places to the SVG display using squares
-		svg.append("g")
-			.attr("class", "place")
-			.selectAll("rect")
+		var g = svg.append("g")
+			       .attr("class", "place");
+        if (options.background_image) {
+        	g.append("image")
+        	       .attr("xlink:href", options.background_image)
+        	       .attr("width" , view_width)
+        	       .attr("height", view_height);
+        }
+		g
+		   .selectAll("rect")
 		   .data(places)
 		   .enter().append("rect")
 			   .attr("width",    function (d) {
