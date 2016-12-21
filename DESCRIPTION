@@ -12,6 +12,7 @@ License: MIT + file LICENSE
 LazyData: TRUE
 Description: What the package does (one paragraph).
 Imports:
+    knitr,
     htmlwidgets,
     magrittr,
     plyr,
