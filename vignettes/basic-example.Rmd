@@ -11,10 +11,11 @@ vignette: >
 
 <!-- ANY PACKAGES USED HERE MUST BE LOADED IN THE DESCRIPTION FILE AS WELL !-->
 
-Load the library
+Load the the library and `dplyr` for data manipulation.
 
 ```{r}
 library(eventsObserveR)
+library(dplyr)
 ```
 
 There are a set of sample event observations provided in the library
@@ -32,6 +33,14 @@ eventsObserveR(events = sample_events_data,
 
 # Events occur at specific coordinates
 
+Make a legend
+
+```{r}
+legend.df <- sample_events_data %>%
+  select(event_type, color, event_type_id) %>%
+  rename(description = event_type) %>%
+  unique()
+```
 
 
 ```{r}
@@ -39,9 +48,6 @@ head(sample_locations_data)
 ```
 
 
-scdsds
-
-
 ```{r}
 eventsObserveR(events = sample_events_data, 
                place.key = "station",
@@ -49,7 +55,6 @@ eventsObserveR(events = sample_events_data,
                legend = legend.df,
                legend.columns = 2,
                shape.type = "circle",
-               # event.radius = 10,
                size = list(
                  view.width = 1040,
                  view.height = 720,
@@ -76,27 +81,6 @@ eventsObserveR(events = sample_events_data,
 
 
 ```{r}
-legend.df <- sample_events_data %>%
-  select(species, color) %>%
-  rename(description = species) %>%
-  unique()
-
-
-# sample_events_data <- sample_events_data %>%
-#   select(-radius)
-
-small_events_data <- sample_events_data[1:10,]
-# legend.df <- small_events_data %>%
-#   select(species, color) %>%
-#   rename(description = species) %>%
-#   unique()
-
-small_events_data$color[small_events_data$species == "spider"] <- "red"
-
-new.legend.df <- data.frame(
-  description = c("spider","eagle owl"),
-  color = c("red", "blue")
-)
 
 eventsObserveR(events = sample_events_data, 
                place.key = "station",
