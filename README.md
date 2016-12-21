@@ -1,5 +1,7 @@
 # eventsObserveR
 
+[![Travis-CI Build Status](https://travis-ci.org/ox-it/eventsObserveR.svg?branch=master)](https://travis-ci.org/ox-it/eventsObserveR)
+
 R wrapper for a D3 visualisation of event observations attached to specific "places".
 
 An example visualisation is included below:
