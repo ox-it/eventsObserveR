@@ -7,10 +7,10 @@
 eventsObserveR(events, places = NULL, place.key = "place",
   periodsPerSecond = 24, period = 1, previousPeriodDuration = 1,
   period.unit = "days", previous.period.unit = "days",
-  size = list(view.width = 600, view.height = 600, interface.width = 1024,
+  size = list(view.width = 700, view.height = 600, interface.width = 1024,
   interface.height = 786, horizontal.margin = 100, vertical.margin = 100),
   place.radius = NULL, shape.type = "circle", event.radius = 5,
-  place.color = "lavenderblush", event.color = "red", legend = NULL,
+  place.color = "lavenderblush", event.color = "red", legend = FALSE,
   legend.columns = 1)
 }
 \arguments{
@@ -21,6 +21,7 @@ eventsObserveR(events, places = NULL, place.key = "place",
   \item{radius}{radius, size of event when displayed.}
   \item{color}{color, color for the event}
   \item{place_id}{placed_id, id of the location (place) where the event was observed. Must be given if `places` is not NULL.}
+  \item{event_type_id}{event_type_id, event type id ranging from 0 - (number_of_event_types - 1). Used by the legend for grouping.}
  }}
 
 \item{places}{An optional data.frame for place locations, if NULL places will be set to fill outline a circle that fills the available space. Default to NULL
@@ -47,10 +48,12 @@ eventsObserveR(events, places = NULL, place.key = "place",
 
 \item{size}{Optional list of named arguments:
 \itemize{
- \item{"place"}{ : unique "place" id, does not need to be numeric}
- \item{"time"}{ : integer time of event, cannot be as.POSIXct}
- \item{"title"}{ : tooltip of the event}
- \item{...}{}
+ \item{"view.width"}{ : width of area containing both the events viewer and the play/pause controls. Default to 700px}
+ \item{"view.height"}{ : height of area containing both the events viewer and the play/pause controls. Default to 500px}
+ \item{"interface.width"}{ : width of the entire interface, must be larger than view.width. If the legend cannot fit to the right, it will be shown below. Note, however, that the viewer and legend are allowed to rescale themselves dynamically. Default to 1024}
+ \item{"interface.height"}{ : height of the entire interface, must be larger than view.height. If the legend cannot fit to the right, it will be shown below. Note, however, that the viewer and legend are allowed to rescale themselves dynamically. Default to 786}
+ \item{"horizontal.margin"}{ : margin width placed around the events viewer to prevent events displaying outside the interface. Default to 100px}
+ \item{"vertical.margin"}{ : margin height placed around the events viewer to prevent events displaying outside the interface. Default to 100px}
  }}
 
 \item{place.radius}{Radius for circles representing locations for events, used only if `places` is not NULL. Otherwise the radius column in `places` is used.}
@@ -63,7 +66,7 @@ eventsObserveR(events, places = NULL, place.key = "place",
 
 \item{event.color}{Color of events, only used if a column called "color" is not given in `events`. Default is "red".}
 
-\item{legend}{An optional data.frame for legend labelling events by type. Default to NULL
+\item{legend}{An optional data.frame for legend labelling events by type. Default to FALSE.
 \itemize{
     \item{"description"}{ : unique "place" id, does not need to be numeric}
     \item{"color"}{ : }

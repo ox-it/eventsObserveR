@@ -8,7 +8,8 @@
 \describe{
   \item{station}{station, unique identifier for each observation used which must be set as place.key.}
   \item{time}{time, when the event was observed, in as.POSIXct format.}
-  \item{species}{species, species identification, i.e. cougar, kitten, stick insect.}
+  \item{event_type}{species, species identification, i.e. cougar, kitten, stick insect.}
+  \item{event_type_id}{species, unique id for each species ranging from 0-36}
   \item{radius}{radius, size of event when displayed.}
   \item{color}{color, color for the species type}
   \item{place_id}{placed_id, id of the location (place) where the event was observed, corresponding to the id in ``}
