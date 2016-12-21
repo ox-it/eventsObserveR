@@ -14,7 +14,7 @@ function create_event_animator(element) {
 	        resize:  function (new_width, new_height) {
 						 widget.resize(new_width, new_height);
 	                 },
-	        // add_legend interface exposed in case htmlwidget wants to add legend after initialisation
+	        // interface for adding a legend is exposed in case htmlwidget wants to add a legend after initialisation
 	        add_legend: function (legend, legend_columns) {
 	        	            widget.add_legend(legend, legend_columns);
 	                    }
@@ -26,9 +26,9 @@ function animate_events(events, options, element) {
 	//   event_type_id (a number between 0 and one less than the number of unique event types),
 	//   time (a JavaScript Date object) or an integer corresponding to the number milliseconds since 1 January, 1970.
 	// and optionally
-	//   radius, color, title, and any other fields
+	//   radius, color, shape, title, and any other fields
 	// options include:
-	//   places (an array of objects with properties x, y, id, color, radius
+	//   places (an array of objects with properties x, y, id, color, radius/size
 	//           where x and y are pixel coordinates (transformed to fit the viewing area) and
 	//           id matches the place_id of events)
 	//   place_key (a string corresponding to a field in the events -- )
@@ -42,34 +42,38 @@ function animate_events(events, options, element) {
 	//   event_color if events do not specify a color then this value is used
 	//   place_radius radius of place circles
 	//   event_radius radius of events if not explicitly provided
-	//   legend an array of objects with color and description keys
+	//   legend an array of objects with event_type_ids, description and either shape or color properties
 	//   legend_columns the number of columns to display the legend
 
 	if (!options) {
 		options = {};
 	}
 	if (!element) {
+		// if the element upon which the entire interface should be placed is absent then use the document's body
 		element = document.body;
 	}
 	var places                   = options.places; // can be undefined so long as options.place_key is defined
-	var view_width               = options.view_width                    ||  700;
-	var view_height              = options.view_height                   ||  500;
-	var interface_width          = options.width                         || 1024;
-	var interface_height         = options.height                        ||  786;
-	var periods_per_second       = options.periods_per_second            ||   24;
+	var view_width               = options.view_width                    ||      700;
+	var view_height              = options.view_height                   ||      500;
+	var interface_width          = options.width                         ||     1024;
+	var interface_height         = options.height                        ||      786;
+	var periods_per_second       = options.periods_per_second            ||       24;
 	var period                   = options.period                        || 24*60*60; // in seconds
-	var legend_columns           = options.legend_columns                ||    2;
+	var legend_columns           = options.legend_columns                ||        2;
 	var previous_period_duration = typeof options.previous_period_duration === 'number' ? options.previous_period_duration : period;
 
 	var paused            = true;
 	var play_direction    = 1; // forward one period
-	var formatDateInput   = d3.timeFormat("%Y-%m-%d");
+	var formatDateInput   = d3.timeFormat("%Y-%m-%d"); // the date format for the initial beginning and end dates
 	var inactive_event_types = [];
-	var shape_type;
+	var shape_type; // can be either 'circle' or 'image'
 
 	var process_places = function () {
+		// if places aren't defined generates them in the largest elipse that fits the viewing area
+		// otherwise scales the place coordinates given to fit the viewing area
 		var place_names = [];
-		var place_key = options.place_key || "place";
+		var place_key = options.place_key || "place";  // the name of the event property that indicates the location of the event
+		// margins around the viewing area so that circles of events aren't displayed "off screen"
 		var horizontal_margin = options.horizontal_margin || 100;
 	    var vertical_margin   = options.vertical_margin   || 100;
 		var compute_place = function (place_name, index) {
@@ -96,10 +100,11 @@ function animate_events(events, options, element) {
 			}
 		});
 		if (place_names.length === 0) {
-			alert("Error: a place_key used in the events needs to be provided unless the key is 'place' in the event data.");
+			alert("Error: the place_key " + place_key + " does not occur in the events data.");
 			return;
 		};
 		if (places) {
+			// scale the place coordinates to fit the viewing area
 			places.forEach(function (place) {
 				if (place.x > max_place_x) {
 					max_place_x = place.x;
@@ -113,7 +118,7 @@ function animate_events(events, options, element) {
 			for (i = 0; i < places.length; i++) {
 				if (places[i]) {
 					places[i].x = horizontal_margin+(places[i].x*x_factor);
-					// view_height is here because in the browser increasing y is downward
+					// view_height-... is because in the browser increasing y is downward
 					places[i].y = -vertical_margin+view_height-(places[i].y*y_factor);
 				} else {
 					// missing places still need entries even though they'll never be seen
@@ -125,7 +130,7 @@ function animate_events(events, options, element) {
 				}
 			};
 		} else {
-		    places = place_names.map(compute_place);
+			places = place_names.map(compute_place);
 			events.forEach(function (event) {
 				event.place_id = place_names.indexOf(event[place_key]);
 			});
@@ -133,12 +138,13 @@ function animate_events(events, options, element) {
 	};
 
 	var coordinates_from_place = function () {
+		// events are given x and y coordinates based upon their place_ids
 		events.forEach(function (event) {
 			var place = places[event.place_id];
 			if (typeof event.x !== 'number') {
 				// true_x is where the event's place is located
 				event.true_x = place.x;
-				// x is where it should be displayed
+				// x is where it should be displayed which is typically in a circle around the true_x and true_y
 				event.x      = place.x;
 			}
 			if (typeof event.y !== 'number') {
@@ -197,6 +203,7 @@ function animate_events(events, options, element) {
    };
 
    var refresh = function () {
+   	   // spread out the events for the same place the occurred in the same period in circles around place
        var end_time = earliest_day;
        var events_from_this_period = [];
        var locations_to_events = [];
@@ -206,6 +213,7 @@ function animate_events(events, options, element) {
        	  	   return;
        	   }
 	       if (events_from_this_period.length < 2) {
+	       	   // if there is only 1 event that put it right on the place
 	           event = events_from_this_period[0];
 			   event.x = event.true_x;
 		  	   event.y = event.true_y;
@@ -240,6 +248,7 @@ function animate_events(events, options, element) {
 		};
 		var add_event_to_others_this_period = function (event) {
 		    events_from_this_period.push(event);
+		    // and maintain a mapping from locations to events at that location during the current period
 			if (locations_to_events[event.place_id]) {
 			    locations_to_events[event.place_id].push(event);
 			} else {
@@ -248,22 +257,120 @@ function animate_events(events, options, element) {
 		};
 	    events.forEach(function (event, index) {
 						   if (event.time > end_time) {
+						   	   // event is for the next period so spreadout those accumlated for this period
 							   spreadout_events_with_the_same_location();
 							   end_time += period*1000;
 							   events_from_this_period = [];
 							   locations_to_events = [];
 						   }
 						   if (inactive_event_types.indexOf(event.event_type_id) < 0) {
+						   	   // if event type hasn't been deselected in the legend then add it to the list of events for this period
 							   add_event_to_others_this_period(event);
 						   }
 			          });
     };
 
-    var now; // displays events >= now and less than now+period*1000
+    var add_legend = function (legend_data, number_of_columns) {
+	  	 entire_interface.appendChild(create_legend(legend_data, number_of_columns));
+	};
+
+    var create_legend = function (legend_data, number_of_columns) {
+	  	  // displays the legend data in columns (1 if nnumber of columns not specified)
+	  	  var table = document.createElement('table');
+	  	  var create_button = function (label) {
+	  	  	  var button = document.createElement('button');
+	  	  	  button.innerHTML = '<b class="event-replay-button">' + label + '</b>';
+	  	  	  return button;
+	  	  };
+	  	  var select_all   = create_button('Select all');
+	  	  var deselect_all = create_button('Deselect all');
+	  	  var keys = [];
+	  	  var row, td;
+	  	  select_all  .addEventListener('click',
+	  	                                function () {
+	  	                                	// to select all make the list of inactive event types empty
+	  	                                	inactive_event_types = [];
+	  	                                	// and change their CSS style to look active
+	  	                                	keys.forEach(function (key) {
+	  	                                		key.className = "event-key-active";
+	  	                                	});
+	  	                                	// refresh since circles around places may have different events
+	  	                                	refresh();
+	  	                                	// display the current period with all types active
+	  	  	                       	        update();
+	  	  	                       	    });
+	  	  deselect_all.addEventListener('click',
+	  	                                function () {
+	  	                                	// to deselect all make the list of inactive event types be all types
+	  	                                	inactive_event_types = legend_data.map(function (entry) {
+	  	                                	                                           return entry.event_type_id;
+	  	                                										   });
+	  	                                    // and changes their CSS to look inactivated
+	  	                                    keys.forEach(function (key) {
+	  	                                        key.className = "event-key-inactive";
+	  	                                	});
+	  	                                	refresh();
+	  	  	                       	        update();
+	  	  	                       	    });
+	  	  row = document.createElement('tr');
+	  	  td  = document.createElement('td');
+	  	  td.appendChild(select_all);
+	  	  row.appendChild(td);
+	  	  td  = document.createElement('td');
+	  	  td.appendChild(deselect_all);
+	  	  table.appendChild(row);
+	  	  row.appendChild(td);
+	  	  table.className = "event-legend";
+	  	  legend_data.forEach(function (entry, index) {
+	  	  	  // each entry in the legend is displayed as clickable key (either a coloured circle or a shape) and the event type description
+	  	  	  var key         = document.createElement('td');
+	  	  	  var description = document.createElement('td');
+	  	  	  if (index%number_of_columns === 0) {
+	  	  	  	  // every number_of_columns start a new row
+	  	  	      row = document.createElement('tr');
+	  	  	      table.appendChild(row);
+	  	  	  }
+	  	  	  // perhaps the following should treat the dimensions as 16x16 pixels as the default but legend data can provide other values
+	  	  	  if (entry.shape) {
+				  key.innerHTML = '<img src="' + entry.shape + '" width=16 height=16></img>';
+	  	  	  } else {
+				  key.innerHTML = '<i class="fa fa-circle" aria-hidden="true"></i>';
+				  key.style.color = entry.color;
+	  	  	  }
+	  	  	  key.className = "event-key-active";
+	  	  	  key.addEventListener('click',
+	  	  	                       function () {
+	  	  	                       	   // toggle whether active
+	  	  	                       	   var index = inactive_event_types.indexOf(entry.event_type_id);
+	  	  	                       	   if (index >= 0) {
+	  	  	                       	   	   // was inactive so make it active
+	  	  	                       	   	   inactive_event_types.splice(index, 1);
+	  	  	                       	   	   key.className = "event-key-active";
+	  	  	                       	   } else {
+	  	  	                       	   	   // was active so make it inactive
+	  	  	                       	   	   inactive_event_types.push(entry.event_type_id);
+	  	  	                       	   	   key.className = "event-key-inactive";
+	  	  	                       	   }
+	  	  	                       	   // circles of events may have lost of acquired some events so recompute them
+	  	  	                       	   refresh();
+	  	  	                       	   // display the current and previous period with new settings
+	  	  	                       	   update();
+	  	  	                       });
+	  	  	  key.title = "Click to toggle whether this is included or not.";
+	  	  	  description.innerHTML = entry.description;
+	  	  	  description.className = "event-legend-description";
+	  	  	  row.appendChild(key);
+	  	  	  row.appendChild(description);
+	  	  	  keys.push(key);
+	  	  });
+	  	  return table;
+	  };
+
+	var now; // the time at the beginning of the current period -- events >= now and less than now+period*1000 are the only ones displayed
 
     var current_period = function (time) {
   	    return time >= now &&
-      	       time <  now+1000*period;
+      	       time <  now+1000*period; // period is in seconds while time is milliseconds so need to multiply by 1000
     };
 
     var previous_period = function (time) {
@@ -287,6 +394,7 @@ function animate_events(events, options, element) {
 	  // if integer number of days then just display the date otherwise the date and time
 	  d3.select(time_display).text(period >= 24*60*60 && period%(24*60*60) === 0 ? date.toLocaleDateString() : date.toLocaleString());
       if (shape_type === 'circle') {
+      	  // circles are displayed either filled or hollow depending upon whether current or previous period respectively
       	  nodes
       	    .attr("cx",     function (d) { return coordinate(d, 'x') })
             .attr("cy",     function (d) { return coordinate(d, 'y') })
@@ -296,17 +404,19 @@ function animate_events(events, options, element) {
 							    }
 							    return d.color;
 						    })
+			// current_period's are solid coloured circles with a white border and previous period's are white with a coloured border
 	        .attr("stroke", function (d) {
 							    if (previous_period(d.time)) {
 								    return d.color;
 							    }
 							    return 'white';
 						    })
-						    	    // current_period's are solid coloured circles with a white border and yesterday's are white with a coloured border
-	       .attr("r",     function (d) {
-							  return d.radius;
-						  });
+	        .attr("r",      function (d) {
+							    return d.radius;
+						    });
       } else {
+      	 // shape is displayed as an image
+      	 // if current period is fully opaque and if previous period is 1/4 opacity
       	 nodes
       	   .attr("x",       function (d) { return coordinate(d, 'x')-d.radius })
            .attr("y",       function (d) { return coordinate(d, 'y')-d.radius })
@@ -320,28 +430,32 @@ function animate_events(events, options, element) {
     };
 
     var tick = function() {
+      // display the current and previous periods
 	  update();
 	  if (paused) {
 	  	  return;
 	  }
+	  // progress to the next period
       now += play_direction*period*1000;
       if (now < start_date || now < earliest_day) {
       	  now = Math.max(earliest_day, start_date);
-      	  paused = true; // reached the start date playing in reverse
+      	  paused = true; // paused when reaching the start date playing in reverse
       	  update();
       	  return;
       }
       if (now <= latest_time &&
           now <= end_date) {
+          // schedule next update of the view
     	  setTimeout(tick, 1000/periods_per_second);
       } else {
-      	  // since got the end of the log
+      	  // pause since got to the last event
       	  now = Math.min(latest_day, end_date);
       	  paused = true;
       	  update();
       }
     };
 
+    // creates the viewing area and video player controls
     var view_and_controls = document.createElement('table');
 
     var add_to_view_and_controls = function (element) {
@@ -416,96 +530,17 @@ function animate_events(events, options, element) {
 	  var update_slower_title = function () {
 	  	  slower.title = "Speed is " + periods_per_second.toPrecision(4) + " periods per second. Click to go slower.";
 	  };
-	  var add_legend = function (legend_data, columns) {
-	  	  entire_interface.appendChild(create_legend(legend_data, columns));
-	  };
-	  var create_legend = function (legend_data, columns) {
-	  	  var table = document.createElement('table');
-	  	  var create_button = function (label) {
-	  	  	  var button = document.createElement('button');
-	  	  	  button.innerHTML = '<b class="event-replay-button">' + label + '</b>';
-	  	  	  return button;
-	  	  };
-	  	  var select_all   = create_button('Select all');
-	  	  var deselect_all = create_button('Deselect all');
-	  	  var keys = [];
-	  	  var row, td;
-	  	  select_all  .addEventListener('click',
-	  	                                function () {
-	  	                                	inactive_event_types = [];
-	  	                                	keys.forEach(function (key) {
-	  	                                		key.className = "event-key-active";
-	  	                                	});
-	  	                                	refresh();
-	  	  	                       	        update();
-	  	  	                       	    });
-	  	  deselect_all.addEventListener('click',
-	  	                                function () {
-	  	                                	inactive_event_types = legend_data.map(function (entry) {
-	  	                                	                                           return entry.event_type_id;
-	  	                                										   });
-	  	                                    keys.forEach(function (key) {
-	  	                                        key.className = "event-key-inactive";
-	  	                                	});
-	  	                                	refresh();
-	  	  	                       	        update();
-	  	  	                       	    });
-	  	  row = document.createElement('tr');
-	  	  td  = document.createElement('td');
-	  	  td.appendChild(select_all);
-	  	  row.appendChild(td);
-	  	  td  = document.createElement('td');
-	  	  td.appendChild(deselect_all);
-	  	  table.appendChild(row);
-	  	  row.appendChild(td);
-	  	  table.className = "event-legend";
-	  	  legend_data.forEach(function (entry, index) {
-	  	  	  var key         = document.createElement('td');
-	  	  	  var description = document.createElement('td');
-	  	  	  if (index%columns === 0) {
-	  	  	      row = document.createElement('tr');
-	  	  	      table.appendChild(row);
-	  	  	  }
-	  	  	  if (entry.shape) {
-				  key.innerHTML = '<img src="' + entry.shape + '" width=16 height=16></img>';
-	  	  	  } else {
-				  key.innerHTML = '<i class="fa fa-circle" aria-hidden="true"></i>';
-				  key.style.color = entry.color;
-	  	  	  }
-	  	  	  key.className = "event-key-active";
-	  	  	  key.addEventListener('click',
-	  	  	                       function () {
-	  	  	                       	   // toggle whether active
-	  	  	                       	   var index = inactive_event_types.indexOf(entry.event_type_id);
-	  	  	                       	   if (index >= 0) {
-	  	  	                       	   	   inactive_event_types.splice(index, 1);
-	  	  	                       	   	   key.className = "event-key-active";
-	  	  	                       	   } else {
-	  	  	                       	   	   inactive_event_types.push(entry.event_type_id);
-	  	  	                       	   	   key.className = "event-key-inactive";
-	  	  	                       	   }
-	  	  	                       	   refresh();
-	  	  	                       	   update();
-	  	  	                       });
-	  	  	  key.title = "Click to toggle whether this is included or not.";
-	  	  	  description.innerHTML = entry.description;
-	  	  	  description.className = "event-legend-description";
-	  	  	  row.appendChild(key);
-	  	  	  row.appendChild(description);
-	  	  	  keys.push(key);
-	  	  });
-	  	  return table;
-	  };
 	  var video_player      = document.createElement('div');
 	  var date_selectors    = document.createElement('div');
 	  var periods_interface = document.createElement('div');
 	  var unit_selector = function (id) {
+	  	  // unit selector supports seconds, minutes, hours, days, and weeks
 	  	  return '<select class="event-unit-select" id="' + id + '">' +
   	             '<option name="seconds">seconds</option>' +
   	             '<option name="minutes">minutes</option>' +
   	             '<option name="hours">hours</option>' +
   	             '<option name="days">days</option>' +
-  	             '<option name="days">weeks</option>' +
+  	             '<option name="weeks">weeks</option>' +
   	             '</select>';
 	  };
 	  var seconds_per_unit = function (units) {
@@ -520,18 +555,22 @@ function animate_events(events, options, element) {
 	  var period_change = function () {
 	  	  var units_selector = document.getElementById("period-units");
 	  	  var period_input   = document.getElementById("period-input");
+	  	  // update the number of seconds in the "current" period
 	  	  period = (+period_input.value)*seconds_per_unit(units_selector.value);
 	  	  refresh();
 	  };
 	  var previous_period_change = function () {
 	  	  var units_selector = document.getElementById("previous-period-units");
 	  	  var period_input   = document.getElementById("previous-period-input");
+	  	  // update the number of seconds in the previous period
 	  	  previous_period_duration = (+period_input.value)*seconds_per_unit(units_selector.value);
 	  	  refresh();
 	  };
 	  var time_from_input = function (id) {
 	  	  var date = new Date(document.getElementById(id).value).getTime(); // in milliseconds since epoch
 	  	  // may differ from an integer number of periods due to daylight savings or leap seconds
+	  	  // date-earliest_day is number of days since day of earliest event but may need to be adjusted
+	  	  // if time was changed (e.g. due to daylight savings starting or ending or leap seconds added)
 	  	  var error = (date-earliest_day)%(period*1000);
   		  return date-error;
 	  };
@@ -636,32 +675,34 @@ function animate_events(events, options, element) {
                                       });
 
     var scale_to_fit = function (interface_width, interface_height) {
-                         var scale = Math.min(interface_width  / entire_interface.clientWidth, interface_height / entire_interface.clientHeight);
-                         entire_interface.style.transform = "scale("+ scale + "," + scale + ")";
-                         entire_interface.style["transform-origin"] = "0 0";
+    	                   // if interface (view, player controls, and optionally legend) are not the desired dimensions then scale them
+                           var scale = Math.min(interface_width  / entire_interface.clientWidth, interface_height / entire_interface.clientHeight);
+                           entire_interface.style.transform = "scale("+ scale + "," + scale + ")";
+                           entire_interface.style["transform-origin"] = "0 0";
     };
 
     var add_places = function () {
+    	// add the places to the SVG display using squares
 		svg.append("g")
 			.attr("class", "place")
 			.selectAll("rect")
 		   .data(places)
 		   .enter().append("rect")
 			   .attr("width",    function (d) {
-								 return 2*d.radius;
+								 	 return 2*d.radius;
 							 })
-				.attr("height",    function (d) {
-								 return 2*d.radius;
-							 })
-			   .attr("fill", function (d) {
-								 return d.color;
-							 })
-			   .attr("x",   function (d) {
-								 return d.x-d.radius;
-							 })
-			   .attr("y",   function (d) {
-								 return d.y-d.radius;
-							 })
+			   .attr("height",   function (d) {
+								 	 return 2*d.radius;
+							     })
+			   .attr("fill",     function (d) {
+									 return d.color;
+								 })
+			   .attr("x",        function (d) {
+								     return d.x-d.radius;
+							     })
+			   .attr("y",        function (d) {
+								     return d.y-d.radius;
+							     })
 			   .append("title")
 				  .text(function (d) {
 							return d.title;
@@ -682,8 +723,10 @@ function animate_events(events, options, element) {
 
 	events.forEach(function (event) {
 		   if (event.time.getTime) {
+		   	   // if the event.time is a JavaScript Date object (or the equivalent) convert to integer (milliseconds since epoch)
 		   	   event.time = event.time.getTime();
 		   }
+		   // compute the earliest and latest time of the events
 		   if (!earliest_time || event.time < earliest_time) {
 			   earliest_time = event.time;
 		   }
@@ -708,6 +751,7 @@ function animate_events(events, options, element) {
 	latest_day.setSeconds(0);
 	latest_day = latest_day.getTime();
     end_date = latest_day;
+    // sort events from earliest to latest 
 	events.sort(function (a, b) {
 	       	        if (a.time < b.time) {
 	       	            return -1;
@@ -742,10 +786,7 @@ function animate_events(events, options, element) {
 		  .attr("x",  function(d){ return d.x })
 		  .attr("y",  function(d){ return d.y })
 		  .attr("width",  function(d){ return 2*d.radius })
-		  .attr("height", function(d){ return 2*d.radius })
-		  .attr("fill", function (d) {
-						  return d.color  || options.event_color || 'red';
-					    });
+		  .attr("height", function(d){ return 2*d.radius });
     } else {
        shape_type = 'circle';
    	   nodes = svg.select("g")
@@ -767,7 +808,7 @@ function animate_events(events, options, element) {
 					 });
 	}
 
-	nodes
+	nodes // and add titles
 		.append("title")
 		  .text(function (d) {
 					return d.title;
@@ -778,6 +819,6 @@ function animate_events(events, options, element) {
     return {refresh: refresh,
             resize:  function (width, height) {
             	         scale_to_fit(width, height);
-                     }
-           };
+                     },
+            add_legend: add_legend};
 };

@@ -59,7 +59,7 @@ var read_data = function (station_locations) {
 				   time:          time,
 				   radius:        5*Math.sqrt(row["No. Individuals"]),
 //                 radius:        12,
-// 				   shape:         random_shape(),
+// 				   shape:         random_shape(), // for testing
 				   title:         row["No. Individuals"] + " " + row["Species"] + " by " + row["Camera ID"] + " at " + new Date(time).toLocaleString() +
 									  describe("No. males") +
 									  describe("No. females") +
@@ -88,7 +88,7 @@ var read_data = function (station_locations) {
 	       legend = d3.range(max_event_type_id).map(function (id) {
 	       												return {event_type_id: id,
 	       												        color: color(id/max_event_type_id),
-	       												        //shape: random_shape(),
+	       												        //shape: random_shape(), // for testing
 	       												        description: species[id]};
 	       });
 	       animate_events(animal_observations, {place_key:                        "station",
@@ -99,7 +99,6 @@ var read_data = function (station_locations) {
 	                                            vertical_margin:                        100,
 	                                            width:                                 1200,
 	                                            height:                                 900,
-// 	                                            event_radius:                            16,
 	                                            legend:                              legend,
 	                                            legend_columns:                           2,
 	                                            period:                                   1,
