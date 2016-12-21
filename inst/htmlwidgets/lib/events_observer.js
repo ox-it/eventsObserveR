@@ -61,7 +61,8 @@ function animate_events(events, options, element) {
 	var period                   = options.period                        || 24*60*60; // in seconds
 	var legend_columns           = options.legend_columns                ||        2;
 	var previous_period_duration = typeof options.previous_period_duration === 'number' ? options.previous_period_duration : period;
-
+	var previous_period_units    = options.previous_period_units         || "days";
+	var period_units             = options.period_units                  || "days";
 	var paused            = true;
 	var play_direction    = 1; // forward one period
 	var formatDateInput   = d3.timeFormat("%Y-%m-%d"); // the date format for the initial beginning and end dates
@@ -141,6 +142,7 @@ function animate_events(events, options, element) {
 		// events are given x and y coordinates based upon their place_ids
 		events.forEach(function (event) {
 			var place = places[event.place_id];
+			if (!place) {return;}
 			if (typeof event.x !== 'number') {
 				// true_x is where the event's place is located
 				event.true_x = place.x;
