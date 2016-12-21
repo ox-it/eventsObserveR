@@ -12,7 +12,8 @@
   \item{event_type_id}{species, unique id for each species ranging from 0-36}
   \item{radius}{radius, size of event when displayed.}
   \item{color}{color, color for the species type}
-  \item{place_id}{placed_id, id of the location (place) where the event was observed, corresponding to the id in ``}
+  \item{place_id}{placed_id, id of the location (place) where the event was observed, corresponding to the id in `places`}
+  \item{title}{title, text to show in the tooltip for each event.}
 }}
 \usage{
 sample_events_data

@@ -12,6 +12,8 @@ License: MIT + file LICENSE
 LazyData: TRUE
 Description: What the package does (one paragraph).
 Imports:
+    rmarkdown,
+    knitr,
     htmlwidgets,
     magrittr,
     plyr,
