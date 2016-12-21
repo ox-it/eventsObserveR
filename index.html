@@ -86,7 +86,8 @@ var read_data = function (station_locations) {
 	       	   d.color = color(d.event_type_id/max_event_type_id);
 	       });
 	       legend = d3.range(max_event_type_id).map(function (id) {
-	       												return {color: color(id/max_event_type_id),
+	       												return {event_type_id: id,
+	       												        color: color(id/max_event_type_id),
 	       												        //shape: random_shape(),
 	       												        description: species[id]};
 	       });

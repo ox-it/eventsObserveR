@@ -253,7 +253,7 @@ function animate_events(events, options, element) {
 							   events_from_this_period = [];
 							   locations_to_events = [];
 						   }
-						   if (inactive_event_types.indexOf(event.color) < 0) {
+						   if (inactive_event_types.indexOf(event.event_type_id) < 0) {
 							   add_event_to_others_this_period(event);
 						   }
 			          });
@@ -276,8 +276,7 @@ function animate_events(events, options, element) {
   	  // move current_period's and previous_period's event sightings into view and move others out
   	  var date = new Date(now);
   	  var coordinate = function (d, x_or_y) {
-  	  	  // should replace d.color with d.event_type_id after updating inactive_event_types
-  	  	  if (inactive_event_types.indexOf(d.color) >= 0) {
+  	  	  if (inactive_event_types.indexOf(d.event_type_id) >= 0) {
        	      return -1000;
        	  }
 		  if (current_period(d.time) || previous_period(d.time)) {
@@ -443,7 +442,7 @@ function animate_events(events, options, element) {
 	  	  deselect_all.addEventListener('click',
 	  	                                function () {
 	  	                                	inactive_event_types = legend_data.map(function (entry) {
-	  	                                	                                           return entry.color;
+	  	                                	                                           return entry.event_type_id;
 	  	                                										   });
 	  	                                    keys.forEach(function (key) {
 	  	                                        key.className = "event-key-inactive";
@@ -477,12 +476,12 @@ function animate_events(events, options, element) {
 	  	  	  key.addEventListener('click',
 	  	  	                       function () {
 	  	  	                       	   // toggle whether active
-	  	  	                       	   var index = inactive_event_types.indexOf(entry.color);
+	  	  	                       	   var index = inactive_event_types.indexOf(entry.event_type_id);
 	  	  	                       	   if (index >= 0) {
 	  	  	                       	   	   inactive_event_types.splice(index, 1);
 	  	  	                       	   	   key.className = "event-key-active";
 	  	  	                       	   } else {
-	  	  	                       	   	   inactive_event_types.push(entry.color);
+	  	  	                       	   	   inactive_event_types.push(entry.event_type_id);
 	  	  	                       	   	   key.className = "event-key-inactive";
 	  	  	                       	   }
 	  	  	                       	   refresh();
