@@ -1,5 +1,5 @@
 // Developed by Ken Kahn and Martin Hadley of IT Services, University of Oxford
-// copyright??
+// Copyright University of Oxford 2016, MIT License
 
 function create_event_animator(element) {
 	// interface for HTMLWidgets in R
@@ -281,9 +281,11 @@ function animate_events(events, options, element) {
 	  	  // displays the legend data in columns (1 if nnumber of columns not specified)
 	  	  var table = document.createElement('table');
 	  	  var create_button = function (label) {
+	  	    if(options.legend){
 	  	  	  var button = document.createElement('button');
 	  	  	  button.innerHTML = '<b class="event-replay-button">' + label + '</b>';
 	  	  	  return button;
+	  	    }
 	  	  };
 	  	  var select_all   = create_button('Select all');
 	  	  var deselect_all = create_button('Deselect all');

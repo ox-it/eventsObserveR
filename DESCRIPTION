@@ -11,12 +11,9 @@ Description: R wrapper (htmlwidget) for a D3 visualisation of event observations
 License: MIT + file LICENSE
 LazyData: TRUE
 Description: What the package does (one paragraph).
-Depends:
-    htmlwidgets
-Suggests:
-    knitr,
-    rmarkdown,
-    testthat,
+Imports:
+    htmlwidgets,
+    magrittr,
     plyr,
     dplyr
 Encoding: UTF-8

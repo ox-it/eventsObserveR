@@ -33,5 +33,16 @@ sample_events_data <- sample_events_data %>%
 # sample_events_data <- sample_events_data %>%
 #   select(-radius)
 
+sample_events_data <- sample_events_data %>%
+  # rename(event_type = species) %>%
+  mutate(event_type_id = as.numeric(mapvalues(
+    event_type,
+    from = unique(event_type),
+    to = 0:{
+      length(unique(event_type)) - 1
+    }
+  ))) %>% 
+  mutate(title = event_type)
+  
 save(sample_events_data, file = "data/sample_events_data.rdata")
 save(sample_locations_data, file = "data/sample_locations_data.rdata")

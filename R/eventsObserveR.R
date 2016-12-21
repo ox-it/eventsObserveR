@@ -1,3 +1,5 @@
+# // Developed by Ken Kahn and Martin Hadley of IT Services, University of Oxford
+# // Copyright University of Oxford 2016, MIT License
 #' eventsObserver
 #' 
 #' \code{eventsObserveR} creates an playable visualisation of the distribution of event observations over a range of defined places within a variable time period.
@@ -9,6 +11,7 @@
 #'   \item{radius}{radius, size of event when displayed.}
 #'   \item{color}{color, color for the event}
 #'   \item{place_id}{placed_id, id of the location (place) where the event was observed. Must be given if `places` is not NULL.}
+#'   \item{event_type_id}{event_type_id, event type id ranging from 0 - (number_of_event_types - 1). Used by the legend for grouping.}
 #'  }
 #'  
 #' @param places An optional data.frame for place locations, if NULL places will be set to fill outline a circle that fills the available space. Default to NULL
@@ -28,17 +31,19 @@
 #' @param previous.period.unit Unit (seconds, hours, days) used to calculate the length of the `previous.period`. Default to "days".
 #' @param size Optional list of named arguments:
 #' \itemize{
-#'  \item{"place"}{ : unique "place" id, does not need to be numeric}
-#'  \item{"time"}{ : integer time of event, cannot be as.POSIXct}
-#'  \item{"title"}{ : tooltip of the event}
-#'  \item{...}{}
+#'  \item{"view.width"}{ : width of area containing both the events viewer and the play/pause controls. Default to 700px}
+#'  \item{"view.height"}{ : height of area containing both the events viewer and the play/pause controls. Default to 500px}
+#'  \item{"interface.width"}{ : width of the entire interface, must be larger than view.width. If the legend cannot fit to the right, it will be shown below. Note, however, that the viewer and legend are allowed to rescale themselves dynamically. Default to 1024}
+#'  \item{"interface.height"}{ : height of the entire interface, must be larger than view.height. If the legend cannot fit to the right, it will be shown below. Note, however, that the viewer and legend are allowed to rescale themselves dynamically. Default to 786}
+#'  \item{"horizontal.margin"}{ : margin width placed around the events viewer to prevent events displaying outside the interface. Default to 100px}
+#'  \item{"vertical.margin"}{ : margin height placed around the events viewer to prevent events displaying outside the interface. Default to 100px}
 #'  }
 #' @param place.radius Radius for circles representing locations for events, used only if `places` is not NULL. Otherwise the radius column in `places` is used.
 #' @param shape.type Type of shape to use for events, defaults to "circle". Can be path to svg images.
 #' @param event.radius Radius for events, default to 5. Only used if a column called "radius" in `events` is not given.
 #' @param event.color Color of events, only used if a column called "color" is not given in `events`. Default is "red".
 #' @param place.color Color for places, default to "lavenderblush". Only used if a column called "color" in `places` is not given.
-#' @param legend An optional data.frame for legend labelling events by type. Default to NULL
+#' @param legend An optional data.frame for legend labelling events by type. Default to FALSE.
 #' \itemize{
 #'     \item{"description"}{ : unique "place" id, does not need to be numeric}
 #'     \item{"color"}{ : }
@@ -56,7 +61,7 @@ eventsObserveR <- function(events,
                           period.unit = "days",
                           previous.period.unit = "days",
                           size = list(
-                            view.width = 600,
+                            view.width = 700,
                             view.height = 600,
                             interface.width = 1024, 
                             interface.height = 786,
@@ -68,7 +73,7 @@ eventsObserveR <- function(events,
                           event.radius = 5,
                           place.color = "lavenderblush",
                           event.color = "red",
-                          legend = NULL,
+                          legend = FALSE,
                           legend.columns = 1) {
   # coerce the times into milliseconds
   # TODO: Apply logic more sensibly and provide errors

@@ -17,7 +17,13 @@ HTMLWidgets.widget({
         var events = HTMLWidgets.dataframeToD3(x.events);
        
         var settings = x.settings;
-        settings.legend = HTMLWidgets.dataframeToD3(settings.legend);
+        
+        if(!settings.legend){
+          // settings.legend by default FALSE, meaning do not display
+          settings.legend = null;
+        } else {
+          settings.legend = HTMLWidgets.dataframeToD3(settings.legend);
+        }
         
         if (settings.places) settings.places = HTMLWidgets.dataframeToD3(settings.places);
 
