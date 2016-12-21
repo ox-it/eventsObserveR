@@ -85,6 +85,8 @@ var read_data = function (station_locations) {
 	       animal_observations.forEach(function (d) {
 	       	   d.color = color(d.event_type_id/max_event_type_id);
 	       });
+	       // create the legend for event types from 0 to max_event_type_id
+	       // each legend entry is the event type id, the species, and either the color or shape of that species
 	       legend = d3.range(max_event_type_id).map(function (id) {
 	       												return {event_type_id: id,
 	       												        color: color(id/max_event_type_id),
