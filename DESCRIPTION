@@ -12,7 +12,10 @@ License: MIT + file LICENSE
 LazyData: TRUE
 Description: What the package does (one paragraph).
 Imports:
+<<<<<<< HEAD
     rmarkdown,
+=======
+>>>>>>> origin/remove-emre
     knitr,
     htmlwidgets,
     magrittr,
