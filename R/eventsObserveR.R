@@ -51,6 +51,19 @@
 #' @param legend.columns How many columns should the legened entries be split across. Default to 1
 #'  
 #' @import htmlwidgets
+#' @return 
+#' A HTML widget object
+#' 
+#' @examples
+#' ## Visualise events on places equally distributed around a circle
+#' eventsObserveR(events = sample_events_data,
+#' place.key = "station")
+#'
+#' ## Visualise events on places specified by the sample_locations_data
+#' eventsObserveR(events = sample_events_data, 
+#' place.key = "station",
+#' places = sample_locations_data)
+#' 
 #' @export
 eventsObserveR <- function(events, 
                           places = NULL, 
@@ -123,30 +136,4 @@ eventsObserveR <- function(events,
                             # )
                             )
   
-}
-
-#' eventsObserverOutput
-#' 
-#' Use \code{eventsObserverOutput()} to create a UI element, and \code{renderEventsObserver()} to render the eventsObserveR widget.
-#' 
-#' @param outputId output variable to read from
-#' @param width width of eventsObserveR
-#' @param height height of eventsObserveR
-#' @export
-eventsObserverOutput <- function(outputId, width = "100%", height = "400px") {
-  shinyWidgetOutput(outputId, "eventsObserveR", width, height, package = "eventsObserveR")
-}
-
-#' renderEventsObserver
-#' 
-#' Use \code{eventsObserverOutput()} to create a UI element, and \code{renderEventsObserver()} to render the eventsObserveR widget.
-#' 
-#' @param expr Call to eventsObserveR that generates a eventsObserveR class object that can be rendered client-side using eventsObserveROutput
-#' @param env The environment in which to evaluate expr.
-#' @param quoted Is expr a quoted expression (with quote())? This is useful if you want to save an expression in a variable.
-#' 
-#' @export
-renderEventsObserver <- function(expr, env = parent.frame(), quoted = FALSE) {
-  if (!quoted) { expr <- substitute(expr) } # force quoted
-  shinyRenderWidget(expr, eventsObserverOutput, env, quoted = TRUE)
 }
