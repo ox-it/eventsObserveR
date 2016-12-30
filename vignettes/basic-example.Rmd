@@ -81,7 +81,6 @@ eventsObserveR(events = sample_events_data,
 
 
 ```{r}
-
 eventsObserveR(events = sample_events_data, 
                place.key = "station",
                places = sample_locations_data,
@@ -95,4 +94,5 @@ eventsObserveR(events = sample_events_data,
                  interface.width = 1200, 
                  interface.height = 900))
 ```
+
 
