@@ -10,14 +10,14 @@ test_that(
   }
   )
 
-test_that("renderEventsObserver returns a function", {
-  print("inside render")
-  expect_true(is.function(renderEventsObserver(
-    eventsObserveR(events = sample_events_data,
-                   place.key = "station")
-  )))
-  
-})
+# test_that("renderEventsObserver returns a function", {
+#   print("inside render")
+#   expect_true(is.function(renderEventsObserver(
+#     eventsObserveR(events = sample_events_data,
+#                    place.key = "station")
+#   )))
+#   
+# })
 
 
 
