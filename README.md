@@ -2,6 +2,8 @@
 
 [![Travis-CI Build Status](https://travis-ci.org/ox-it/eventsObserveR.svg?branch=master)](https://travis-ci.org/ox-it/eventsObserveR)
 
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
+
 R wrapper for a D3 visualisation of event observations attached to specific "places".
 
 An example visualisation is included below:
@@ -30,7 +32,6 @@ devtools::install_github('oxit/eventsObserveR')
 
 
 # Overview
-
 
 This package was developed by Ken Kahn and Martin Hadley in IT Services at Oxford University for a case study in the Live Data project, see the [Oxford Interactive Data Network](idn.web.ox.ac.uk) website for further details.
 

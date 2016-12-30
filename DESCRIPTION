@@ -1,16 +1,16 @@
 Package: eventsObserveR
 Type: Package
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
+Title: R Wrapper For A D3 Visualisation Of Event Observations Attached To Specific "Places"
+Version: 0.1.0.9000
 Authors@R: c(
     person("Ken", "Kahn", email = "kenneth.kahn@it.ox.ac.uk", role = "cre"),
     person("Martin", "Hadley", email = "martin.hadley@it.ox.ac.uk", role = "aut"))
-Description: R wrapper (htmlwidget) for a D3 visualisation of event observations 
-    attached to specific "places". The interface includes controls for viewing events 
-    occuring within a set "period" and a "previous period", differentiated by hollow dots.
+Description: Visualisation library designed for representing the observation of events at specific times, and (optionally)
+    specific [x, y] coordinates. Originally concieved to visualise animal sightings by fixed motion-activated cameras, with the user
+    able to specify the current and previous observation periods (1 day). The library provides the facility to specify 
+    the locations of "places" where events are observed, otherwise "places" are equally distributed around a circle.
 License: MIT + file LICENSE
 LazyData: TRUE
-Description: What the package does (one paragraph).
 Imports:
     rmarkdown,
     knitr,
@@ -22,3 +22,4 @@ Encoding: UTF-8
 RoxygenNote: 5.0.1
 URL: http://ox-it.github.io/OxfordIDN_htmlwidgets
 VignetteBuilder: knitr
+Suggests: testthat
