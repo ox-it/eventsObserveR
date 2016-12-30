@@ -74,7 +74,21 @@ eventsObserveR(events, places = NULL, place.key = "place",
 
 \item{legend.columns}{How many columns should the legened entries be split across. Default to 1}
 }
+\value{
+A HTML widget object
+}
 \description{
 \code{eventsObserveR} creates an playable visualisation of the distribution of event observations over a range of defined places within a variable time period.
+}
+\examples{
+## Visualise events on places equally distributed around a circle
+eventsObserveR(events = sample_events_data,
+place.key = "station")
+
+## Visualise events on places specified by the sample_locations_data
+eventsObserveR(events = sample_events_data, 
+place.key = "station",
+places = sample_locations_data)
+
 }
 
