@@ -2,7 +2,7 @@
 
 [![Travis-CI Build Status](https://travis-ci.org/ox-it/eventsObserveR.svg?branch=master)](https://travis-ci.org/ox-it/eventsObserveR)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
-[![Codecov](https://img.shields.io/codecov/c/github/ox-it/eventsObserver.svg)](https://codecov.io/gh/ox-it/eventsObserveR)
+[![Codecov](https://img.shields.io/codecov/c/github/ox-it/eventsObserveR.svg)](https://codecov.io/gh/ox-it/eventsObserveR)
 
 R wrapper for a D3 visualisation of event observations attached to specific "places".
 
