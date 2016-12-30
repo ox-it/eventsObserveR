@@ -21,13 +21,13 @@
 #' )
 #'
 #' if (interactive()) print(app)}
-eventsObserverOutput <- function(outputId, width = "100%", height = "400px") {
-  shinyWidgetOutput(outputId, "eventsObserveR", width, height, package = "eventsObserveR")
+renderEventsObserver <- function(expr, env = parent.frame(), quoted = FALSE) {
+if (!quoted) { expr <- substitute(expr) } # force quoted
+shinyRenderWidget(expr, eventsObserverOutput, env, quoted = TRUE)
 }
 
 #' @rdname map-shiny
 #' @export
-renderEventsObserver <- function(expr, env = parent.frame(), quoted = FALSE) {
-  if (!quoted) { expr <- substitute(expr) } # force quoted
-  shinyRenderWidget(expr, eventsObserverOutput, env, quoted = TRUE)
+eventsObserverOutput <- function(outputId, width = "100%", height = "400px") {
+  shinyWidgetOutput(outputId, "eventsObserveR", width, height, package = "eventsObserveR")
 }
