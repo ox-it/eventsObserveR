@@ -3,7 +3,7 @@
 #' eventsObserver
 #' 
 #' \code{eventsObserveR} creates an playable visualisation of the distribution of event observations over a range of defined places within a variable time period.
-#' @importFrom RCurl url.exists
+#' @importFrom base64enc dataURI
 #' @param events A data.frame with events, needs at least place.key, time and place_id
 #' \itemize{
 #'   \item{"place.key"}{ : place.key, unique identifier for each observation used which must be set as place.key.}
@@ -94,17 +94,21 @@ eventsObserveR <- function(events,
                           background.image = FALSE
                           ) {
   
-  if(background.image != FALSE){
-    if(!RCurl::url.exists(background.image)){
-      stop("The URL for the background image you provided does not appear to exist, this package does not currently support relative image paths. See https://github.com/ox-it/eventsObserveR/issues/17.")
-    }
-  }
-  
   # coerce the times into milliseconds
   # TODO: Apply logic more sensibly and provide errors
   events$time <- as.integer(events$time) * 1000
 
   # mutate(time = as.integer(time) * 1000)
+  
+  ## Convert image to base64 per https://github.com/ox-it/eventsObserveR/issues/17
+  if(background.image != FALSE){
+    background.image <- base64enc::dataURI(
+      # note: this works with local also
+      # note: dataURI also works with RAW content so pairs nicely with magick
+      file = background.image,
+      mime = "image/png"
+    )
+  }
   
   # create a list that contains the settings
   settings <- list(
@@ -150,3 +154,13 @@ eventsObserveR <- function(events,
                             )
   
 }
+
+b64img <- function(img_url){
+  base64enc::dataURI(
+  # note: this works with local also
+  # note: dataURI also works with RAW content so pairs nicely with magick
+  file = img_url,
+  mime = "image/png"
+)
+}
+

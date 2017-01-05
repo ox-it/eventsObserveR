@@ -34,9 +34,10 @@ eventsObserveR(events = sample_events_data,
                place.key = "station",
                legend = legend.df,
                places = sample_locations_data,
-               background.image = "https://raw.githubusercontent.com/ox-it/eventsObserveR/5ad38998f03c48dd141eab2b5188f26668347dab/test-background.png" # does not support relative URLs [i.e. files at getwd() yet
+               background.image = "test-background.png" # does not support relative URLs [i.e. files at getwd() yet
 )
 ```
+
 
 # SVG shapes
 
@@ -72,8 +73,7 @@ eventsObserveR(events = events_with_shapes,
                size = list(
                  interface.width = "1200px"
                ),
-               places = sample_locations_data,
-               background.image = "https://raw.githubusercontent.com/ox-it/eventsObserveR/5ad38998f03c48dd141eab2b5188f26668347dab/test-background.png" # does not support relative URLs [i.e. files at getwd() yet
+               places = sample_locations_data
 )
 ```
 
