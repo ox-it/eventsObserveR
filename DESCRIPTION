@@ -13,6 +13,7 @@ License: MIT + file LICENSE
 LazyData: TRUE
 Imports:
     rmarkdown,
+    RCurl,
     knitr,
     htmlwidgets,
     magrittr,

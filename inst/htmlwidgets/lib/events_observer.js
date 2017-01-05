@@ -691,6 +691,7 @@ function animate_events(events, options, element) {
 		var g = svg.append("g")
 			       .attr("class", "place");
         if (options.background_image) {
+          // TODO: SUPPORT RELATIVE URLS
         	g.append("image")
         	       .attr("xlink:href", options.background_image)
         	       .attr("width" , view_width)

@@ -3,25 +3,26 @@
 #' eventsObserver
 #' 
 #' \code{eventsObserveR} creates an playable visualisation of the distribution of event observations over a range of defined places within a variable time period.
-#' 
+#' @importFrom RCurl url.exists
 #' @param events A data.frame with events, needs at least place.key, time and place_id
 #' \itemize{
-#'   \item{place.key}{place.key, unique identifier for each observation used which must be set as place.key.}
-#'   \item{time}{time, when the event was observed, in as.POSIXct format.}
-#'   \item{radius}{radius, size of event when displayed.}
-#'   \item{color}{color, color for the event}
-#'   \item{place_id}{placed_id, id of the location (place) where the event was observed. Must be given if `places` is not NULL.}
-#'   \item{event_type_id}{event_type_id, event type id ranging from 0 - (number_of_event_types - 1). Used by the legend for grouping.}
+#'   \item{"place.key"}{ : place.key, unique identifier for each observation used which must be set as place.key.}
+#'   \item{"time"}{ : time, when the event was observed, in as.POSIXct format.}
+#'   \item{"radius"}{ : radius, size of event when displayed.}
+#'   \item{"color"}{ : color, color for the event}
+#'   \item{"place_id"}{ : id of the location (place) where the event was observed. Must be given if `places` is not NULL.}
+#'   \item{"event_type_id"}{ : event type id ranging from 0 - (number_of_event_types - 1). Used by the legend for grouping.}
+#'   \item{"shape"}{ : shape of event}
 #'  }
 #'  
 #' @param places An optional data.frame for place locations, if NULL places will be set to fill outline a circle that fills the available space. Default to NULL
 #' \itemize{
 #'   \item{id}{id, Unique id for each location, ranging from 0 - 98. Note that these ids correspond to the `place_id` in `sample_events_data`}
-#'   \item{x}{x, x coordinate of each locations}
-#'   \item{y}{y, y coordinate of each locations}
-#'   \item{color}{color, color of each location}
-#'   \item{radius}{radius, radiues of each location}
-#'   \item{title}{title, tooltip text displayed when hovering over the location}
+#'   \item{"x"}{ : x coordinate of each locations}
+#'   \item{"y"}{ : y coordinate of each locations}
+#'   \item{"color"}{ : color of each location}
+#'   \item{"radius"}{ : radiues of each location}
+#'   \item{"title"}{ : tooltip text displayed when hovering over the location}
 #'  }
 #' @param place.key Name of column containing place.key in the events data.frame (defaults to place).
 #' @param periodsPerSecond Equivalent to number of "frames per second when playing" the eventsObserver animation. Default 24.
@@ -45,11 +46,13 @@
 #' @param place.color Color for places, default to "lavenderblush". Only used if a column called "color" in `places` is not given.
 #' @param legend An optional data.frame for legend labelling events by type. Default to FALSE.
 #' \itemize{
-#'     \item{"description"}{ : unique "place" id, does not need to be numeric}
-#'     \item{"color"}{ : }
+#'     \item{"event_type_id"}{ : unique "event type" id" corresponding to the event_type_id column in \code{events}}
+#'     \item{"description"}{ : label for event type in the legend}
+#'     \item{"color"}{ : color of legend icon (if shape is not given)}
+#'     \item{"shape"}{ : svg icon to display for the event type}
 #' }
 #' @param legend.columns How many columns should the legened entries be split across. Default to 1
-#'  
+#' @param background.image URL for a .png image to be shown as the background for eventsObserver, this must be an external URL. Default to FALSE, an error will be returned if \code{RCurl::url.exists(background.image)} fails.
 #' @import htmlwidgets
 #' @return 
 #' A HTML widget object
@@ -87,7 +90,16 @@ eventsObserveR <- function(events,
                           place.color = "lavenderblush",
                           event.color = "red",
                           legend = FALSE,
-                          legend.columns = 1) {
+                          legend.columns = 1,
+                          background.image = FALSE
+                          ) {
+  
+  if(background.image != FALSE){
+    if(!RCurl::url.exists(background.image)){
+      stop("The URL for the background image you provided does not appear to exist, this package does not currently support relative image paths. See https://github.com/ox-it/eventsObserveR/issues/17.")
+    }
+  }
+  
   # coerce the times into milliseconds
   # TODO: Apply logic more sensibly and provide errors
   events$time <- as.integer(events$time) * 1000
@@ -115,7 +127,8 @@ eventsObserveR <- function(events,
     place_color = place.color,
     event_color = event.color,
     legend = legend,
-    legend_columns = legend.columns
+    legend_columns = legend.columns,
+    background_image = background.image
   )
   
   # pass the data and settings using 'x'
