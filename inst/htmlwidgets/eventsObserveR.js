@@ -25,6 +25,16 @@ HTMLWidgets.widget({
           settings.legend = HTMLWidgets.dataframeToD3(settings.legend);
         }
         
+        if(!settings.background_image){
+          // settings.background_image by default FALSE, meaning do not display
+          settings.background_image = null;
+        } else {
+          // TODO: Make this support relative URLS
+          // var image_url = new URL(settings.background_image, window.location.href); 
+
+          settings.background_image = settings.background_image;
+        }
+        
         if (settings.places) settings.places = HTMLWidgets.dataframeToD3(settings.places);
 
         animateEventsWidget.initialise(events, settings);

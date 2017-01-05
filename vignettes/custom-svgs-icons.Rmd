@@ -1,0 +1,80 @@
+---
+title: "Vignette Title"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Load the the library and `dplyr` for data manipulation.
+
+```{r}
+library(eventsObserveR)
+library(plyr)
+library(dplyr)
+```
+
+
+```{r}
+head(sample_events_data)
+```
+
+This places a background image:
+
+```{r}
+legend.df <- sample_events_data %>%
+  select(event_type, color, event_type_id) %>%
+  mutate(description = event_type) %>%
+  unique()
+
+eventsObserveR(events = sample_events_data,
+               place.key = "station",
+               legend = legend.df,
+               places = sample_locations_data,
+               background.image = "https://raw.githubusercontent.com/ox-it/eventsObserveR/5ad38998f03c48dd141eab2b5188f26668347dab/test-background.png" # does not support relative URLs [i.e. files at getwd() yet
+)
+```
+
+# SVG shapes
+
+```{r}
+sample_shapes_data <- data.frame(
+  event_type = {
+    sample_events_data$event_type %>% unique()
+  },
+  event_shape = {
+    sample(c(
+  "http://image.flaticon.com/icons/svg/23/23957.svg",
+  "http://image.flaticon.com/icons/svg/61/61264.svg",
+  "http://image.flaticon.com/icons/svg/109/109239.svg",
+  "http://image.flaticon.com/icons/svg/109/109254.svg",
+  "http://image.flaticon.com/icons/svg/58/58777.svg",
+  "http://image.flaticon.com/icons/svg/34/34872.svg",
+  "http://image.flaticon.com/icons/svg/32/32904.svg"
+), 37, replace = TRUE)
+  },stringsAsFactors = F
+)
+
+events_with_shapes <- sample_events_data %>%
+  mutate(shape = mapvalues(event_type, sample_shapes_data$event_type, sample_shapes_data$event_shape)) %>%
+  mutate(radius = rep(10, nrow(sample_events_data)))
+
+shapes_legend <- legend.df %>%
+  mutate(shape = mapvalues(description, sample_shapes_data$event_type, sample_shapes_data$event_shape))
+
+eventsObserveR(events = events_with_shapes,
+               place.key = "station",
+               legend = shapes_legend,
+               legend.columns = 2,
+               size = list(
+                 interface.width = "1200px"
+               ),
+               places = sample_locations_data,
+               background.image = "https://raw.githubusercontent.com/ox-it/eventsObserveR/5ad38998f03c48dd141eab2b5188f26668347dab/test-background.png" # does not support relative URLs [i.e. files at getwd() yet
+)
+```
+
+
