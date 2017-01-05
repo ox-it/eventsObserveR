@@ -15,6 +15,7 @@ Imports:
     rmarkdown,
     RCurl,
     knitr,
+    base64enc,
     htmlwidgets,
     magrittr,
     plyr,
