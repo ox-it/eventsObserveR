@@ -764,7 +764,7 @@ function animate_events(events, options, element) {
 	latest_day.setSeconds(0);
 	latest_day = latest_day.getTime();
     end_date = latest_day;
-    // sort events from earliest to latest 
+    // sort events from earliest to latest
 	events.sort(function (a, b) {
 	       	        if (a.time < b.time) {
 	       	            return -1;
@@ -779,7 +779,7 @@ function animate_events(events, options, element) {
     add_to_view_and_controls(svg_element);
     add_play_buttons();
 
-	svg = d3.select("svg")
+	svg = d3.select(svg_element)
 				  .attr("width",  view_width)
 				  .attr("height", view_height);
 
