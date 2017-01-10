@@ -6,7 +6,7 @@ cache: packages
 
 r_github_packages:
   - jimhester/covr
-  - ox-it/eventsObserveR
+  - martinjhnhadley/eventsObserveR
   
 after_success:
   - Rscript -e 'library(covr);codecov()'

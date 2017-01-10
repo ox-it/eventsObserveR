@@ -3,7 +3,7 @@
 eventsObserveR
 ==============
 
-[![Travis-CI Build Status](https://travis-ci.org/ox-it/eventsObserveR.svg?branch=master)](https://travis-ci.org/ox-it/eventsObserveR) [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]() [![Codecov](https://img.shields.io/codecov/c/github/ox-it/eventsObserveR.svg)](https://codecov.io/gh/ox-it/eventsObserveR)
+[![Travis-CI Build Status](https://travis-ci.org/martinjhnhadley/eventsObserveR.svg?branch=master)](https://travis-ci.org/martinjhnhadley/eventsObserveR) [![license](https://img.shields.io/github/license/mashape/apistatus.svg)]() [![Codecov](https://img.shields.io/codecov/c/github/martinjhnhadley/eventsObserveR.svg)](https://codecov.io/gh/martinjhnhadley/eventsObserveR)
 
 R wrapper for a D3 visualisation of event observations attached to specific "places".
 
@@ -36,7 +36,7 @@ This package is not available from CRAN, you must install it from Github as foll
 
 ``` r
 if (!require('devtools')) install.packages('devtools')
-devtools::install_github('ox-it/eventsObserveR')
+devtools::install_github('martinjhnhadley/eventsObserveR')
 ```
 
 Documentation
