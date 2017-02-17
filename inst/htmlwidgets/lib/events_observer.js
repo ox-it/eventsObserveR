@@ -698,23 +698,20 @@ function animate_events(events, options, element) {
         	       .attr("height", view_height);
         }
 		g
-		   .selectAll("rect")
+		   .selectAll("circle")
 		   .data(places)
-		   .enter().append("rect")
-			   .attr("width",    function (d) {
-								 	 return 2*d.radius;
-							 })
-			   .attr("height",   function (d) {
-								 	 return 2*d.radius;
-							     })
+		   .enter().append("circle")
+			   .attr("r",    function (d) {
+      	                     return d.radius;
+                         })
 			   .attr("fill",     function (d) {
 									 return d.color;
 								 })
-			   .attr("x",        function (d) {
-								     return d.x-d.radius;
+			   .attr("cx",        function (d) {
+								     return d.x;
 							     })
-			   .attr("y",        function (d) {
-								     return d.y-d.radius;
+			   .attr("cy",        function (d) {
+								     return d.y;
 							     })
 			   .append("title")
 				  .text(function (d) {
