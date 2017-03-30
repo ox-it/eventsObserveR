@@ -100,7 +100,7 @@ eventsObserveR <- function(events,
 
   # mutate(time = as.integer(time) * 1000)
   
-  ## Convert image to base64 per https://github.com/martinjhnhadley/eventsObserveR/issues/17
+  ## Convert image to base64 per https://github.com/ox-it/eventsObserveR/issues/17
   if(background.image != FALSE){
     background.image <- base64enc::dataURI(
       # note: this works with local also
