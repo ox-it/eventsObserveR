@@ -65,13 +65,15 @@ eventsObserveR(events = sample_events_data,
 
 
 ```{r}
-eventsObserveR(events = sample_events_data, 
-               place.key = "station",
+sample_events_data %>%
+  mutate(radius = 2) %>%
+eventsObserveR(place.key = "station",
                places = sample_locations_data,
                legend = legend.df,
                legend.columns = 2,
                shape.type = "circle",
-               # event.radius = 10,
+               place.color = "red",
+               place.radius = 2,
                size = list(
                  view.width = 1040,
                  view.height = 720,
