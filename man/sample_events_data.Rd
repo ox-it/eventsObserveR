@@ -22,4 +22,3 @@ sample_events_data
 A sample set of observed events, one might imagine these are sightings of different species of animals at specific locations (motion-activated cameras) - identified by the `station` column. Note that this is a randomised data set and is not indicative of the true migratory behaviour of e.g. meerkats, cougars and polar bears.
 }
 \keyword{datasets}
-

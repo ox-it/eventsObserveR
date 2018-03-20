@@ -96,4 +96,3 @@ place.key = "station",
 places = sample_locations_data)
 
 }
-

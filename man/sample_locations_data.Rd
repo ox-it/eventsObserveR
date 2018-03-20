@@ -20,4 +20,3 @@ sample_locations_data
 The locations of motion-activated camera traps that recorded the events from `sample_events_data`, with (x,y) coordinates. Note that for data sensitivity reasons the coordinates are not required to be valid longitude/latitude pairs.
 }
 \keyword{datasets}
-

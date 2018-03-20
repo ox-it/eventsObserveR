@@ -21,7 +21,7 @@ library(dplyr)
 There are a set of sample event observations provided in the library
 
 ```{r}
-head(sample_events_data)
+head( %>% )
 ```
 
 These can be displayed in an `eventsObserver` viewer by specifying just the `place.key` as the column name "station". Unique places are distributed round a circle in the order that they first appear in the `place.key` column.
