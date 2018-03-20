@@ -6,7 +6,7 @@
 #' @importFrom base64enc dataURI
 #' @param events A data.frame with events, needs at least place.key, time and place_id
 #' \itemize{
-#'   \item{"place.key"}{ : place.key, unique identifier for each observation used which must be set as place.key.}
+#'   \item{"place.key"}{ : place.key, unique identifier for each "place" an event can take place.}
 #'   \item{"time"}{ : time, when the event was observed, in as.POSIXct format.}
 #'   \item{"radius"}{ : radius, size of event when displayed.}
 #'   \item{"color"}{ : color, color for the event}
